@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../assistente_farmacia_panel"
+		},
+		{
+			"path": "../../APP-assistente-farmacia/assistente_farmacia_app"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "assistente_farmacia_app"
+	}
+}
