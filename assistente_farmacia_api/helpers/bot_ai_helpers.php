@@ -618,7 +618,7 @@ function get_openai_chatbot_prompt( $pharma, $user, $user_prompt, $has_image = f
 		$on_duty = 'La farmacia Giovinazzi per l\'anno 2025 effettuerà il turno notturno nei giorni (yyyy-mm-dd) ' . implode(', ', $on_duty);
 	}
 
-	$services = get_services();
+	$services = get_services($pharma['id']);
 	$services_text = 'Recarsi in farmacia per conoscere i servizi.';
 	$tmp_services_text = '';
 	if( ! empty($services) ){
@@ -653,7 +653,7 @@ function get_openai_chatbot_prompt( $pharma, $user, $user_prompt, $has_image = f
 	$tmp_promos_text = trim($tmp_promos_text);
 	if( ! empty($tmp_promos_text) ) $promos_text = "\n".$tmp_promos_text;
 
-	$events = get_events();
+	$events = get_events($pharma['id']);
 	$events_text = 'Recarsi in farmacia per conoscere le giornate.';
 	$tmp_events_text = '';
 	if( ! empty($events) ){
@@ -1280,4 +1280,3 @@ function openai_generate_weekly_challenge( string $date ){
 	write_log("openai_generate_weekly_challenge: Contenuto grezzo: " . substr($challenge_raw, 0, 500));
 	return false;
 }
-

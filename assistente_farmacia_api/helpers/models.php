@@ -436,11 +436,11 @@ function get_daily_pill( $date = NULL ){
 	return FALSE;
 }
 
-function get_events(){
+function get_events( $pharma_id ){
 	global $pdo;
 
-	$stmt = $pdo->prepare("SELECT * FROM jta_events WHERE is_deleted = 0 ORDER BY `datetime_start` ASC");
-	$stmt->execute();
+	$stmt = $pdo->prepare("SELECT * FROM jta_events WHERE is_deleted = 0 AND pharma_id = :pharma_id ORDER BY `datetime_start` ASC");
+	$stmt->execute([':pharma_id' => $pharma_id]);
 	$events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 	$events = array_map( function($_event){
@@ -469,11 +469,11 @@ function get_event_by_id( $event_id = NULL ){
 	return $event;
 }
 
-function get_services(){
+function get_services( $pharma_id ){
 	global $pdo;
 
-	$stmt = $pdo->prepare("SELECT * FROM jta_services WHERE is_deleted = 0 ORDER BY title ASC");
-	$stmt->execute();
+	$stmt = $pdo->prepare("SELECT * FROM jta_services WHERE is_deleted = 0 AND pharma_id = :pharma_id ORDER BY title ASC");
+	$stmt->execute([':pharma_id' => $pharma_id]);
 	$services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 	$services = array_map( function($_service){
