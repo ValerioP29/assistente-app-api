@@ -10,11 +10,13 @@ if( ! $user ){
 		'status'  => FALSE,
 		'error'   => 'Invalid or expired token',
 		'message' => 'Accesso negato',
-	]);
+]);
 	exit();
 }
 
 //------------------------------------------------
+
+$pharma = getMyPharma();
 
 $now = date('Y-m-d H:i:s');
 

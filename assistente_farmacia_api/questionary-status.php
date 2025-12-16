@@ -10,11 +10,13 @@ if( ! $user ){
 		'status'  => false,
 		'error'   => 'Invalid or expired token',
 		'message' => 'Accesso negato',
-	]);
+]);
 	exit();
 }
 
 //------------------------------------------------
+
+$pharma = getMyPharma();
 
 // Recupera l'ID utente dal parametro GET
 $target_user_id = $_GET['user_id'] ?? NULL;

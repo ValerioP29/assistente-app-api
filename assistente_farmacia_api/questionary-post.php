@@ -10,11 +10,13 @@ if( ! $user ){
 		'status'  => false,
 		'error'   => 'Invalid or expired token',
 		'message' => 'Accesso negato',
-	]);
+]);
 	exit();
 }
 
 //------------------------------------------------
+
+$pharma = getMyPharma();
 
 $input = json_decode(file_get_contents("php://input"), TRUE);
 

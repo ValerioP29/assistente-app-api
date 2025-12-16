@@ -1,11 +1,12 @@
 <?php
 	$success = null;
 	$error = null;
+	$pharma_id = isset($_GET['pharma_id']) && is_numeric($_GET['pharma_id']) ? (int) $_GET['pharma_id'] : null;
 
 	require_once('../_api_bootstrap.php');
 
 	$default_date = '';
-	$last_quiz = QuizzesModel::getLastAvailable(FALSE);
+	$last_quiz = QuizzesModel::getLastAvailable(FALSE, $pharma_id);
 	if( $last_quiz ){
 		$default_date = new DateTime($last_quiz['date']);
 		$default_date->modify('+1 day');
@@ -23,7 +24,7 @@
 		}else if ( $psw != 'jta25' ) {
 			$error = "Il campo password è errato.";
 		} else {
-			$quiz_id = QuizzesModel::insertFromAI($date, $points, $topic);
+			$quiz_id = QuizzesModel::insertFromAI($date, $points, $topic, $pharma_id);
 
 			if (! $quiz_id) {
 				$error = "Errore nella generazione del quiz.";
@@ -32,9 +33,9 @@
 			}
 		}
 	}elseif( isset($_GET['today']) ){
-		$today_quiz = QuizzesModel::getToday();
+		$today_quiz = QuizzesModel::getToday($pharma_id);
 		if( ! $today_quiz ){
-			$quiz_id = QuizzesModel::insertFromAI(date('Y-m-d'), 0, '');
+			$quiz_id = QuizzesModel::insertFromAI(date('Y-m-d'), 0, '', $pharma_id);
 			if( $quiz_id ){ echo 'Generazione effettuata #'.$quiz_id.'.'; }
 			else{ echo 'Generazione fallita.'; }
 			exit;
