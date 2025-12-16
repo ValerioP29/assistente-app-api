@@ -16,6 +16,17 @@ if( ! $user ){
 
 //------------------------------------------------
 
+$pharma = getMyPharma();
+if( ! $pharma ){
+	echo json_encode([
+		'code'    => 400,
+		'status'  => FALSE,
+		'error'   => 'Bad Request',
+		'message' => 'Farmacia non valida.',
+	]);
+	exit();
+}
+
 // Recupera il parametro "giorno"
 $date = $_GET['giorno'] ?? NULL;
 // Recupera il parametro "id"
@@ -44,9 +55,9 @@ if ( $date && !is_valid_date($date) ) {
 }
 
 if ( $date ) {
-	$daily_pill = PillsModel::findByDate($date);
+	$daily_pill = PillsModel::findByDate($date, (int) $pharma['id']);
 }elseif ( $id ) {
-	$daily_pill = PillsModel::findById($id);
+	$daily_pill = PillsModel::findById($id, (int) $pharma['id']);
 }else{
 	echo json_encode([
 		'code'    => 400,

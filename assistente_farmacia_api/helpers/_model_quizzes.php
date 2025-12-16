@@ -4,9 +4,10 @@ class QuizzesModel {
 	/**
 	 * Restituisce tutti i quiz presenti in tabella.
 	 */
-	public static function getAll(): array {
+	public static function getAll(int $pharma_id): array {
 		global $pdo;
-		$stmt = $pdo->query("SELECT * FROM jta_quizzes ORDER BY date DESC");
+		$stmt = $pdo->prepare("SELECT * FROM jta_quizzes WHERE pharma_id = :pharma_id ORDER BY date DESC");
+		$stmt->execute([':pharma_id' => $pharma_id]);
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 		if (!$results) return [];
@@ -21,10 +22,10 @@ class QuizzesModel {
 	/**
 	 * Restituisce il quiz relativo a una specifica data (formato YYYY-MM-DD).
 	 */
-	public static function getByDate(string $date) {
+	public static function getByDate(string $date, int $pharma_id) {
 		global $pdo;
-		$stmt = $pdo->prepare("SELECT * FROM jta_quizzes WHERE date = :date LIMIT 1");
-		$stmt->execute(['date' => $date]);
+		$stmt = $pdo->prepare("SELECT * FROM jta_quizzes WHERE date = :date AND pharma_id = :pharma_id LIMIT 1");
+		$stmt->execute([':date' => $date, ':pharma_id' => $pharma_id]);
 
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
 		return $result ? self::decodeJsonFields($result) : false;
@@ -33,13 +34,13 @@ class QuizzesModel {
 	/**
 	 * Restituisce l'ultimo quiz disponibile con data non futura.
 	 */
-	public static function getLastAvailable( $not_future = TRUE ) {
+	public static function getLastAvailable( int $pharma_id, $not_future = TRUE ) {
 		global $pdo;
-		if( $not_future ){
-			$stmt = $pdo->query("SELECT * FROM jta_quizzes WHERE date <= CURDATE() ORDER BY date DESC LIMIT 1");
-		}else{
-			$stmt = $pdo->query("SELECT * FROM jta_quizzes WHERE date ORDER BY date DESC LIMIT 1");
-		}
+		$query = "SELECT * FROM jta_quizzes WHERE pharma_id = :pharma_id";
+		$query .= $not_future ? " AND date <= CURDATE()" : "";
+		$query .= " ORDER BY date DESC LIMIT 1";
+		$stmt = $pdo->prepare($query);
+		$stmt->execute([':pharma_id' => $pharma_id]);
 
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
 		return $result ? self::decodeJsonFields($result) : false;
@@ -48,8 +49,8 @@ class QuizzesModel {
 	/**
 	 * Restituisce il quiz del giorno (se esiste).
 	 */
-	public static function getToday() {
-		return self::getByDate(date('Y-m-d'));
+	public static function getToday(int $pharma_id) {
+		return self::getByDate(date('Y-m-d'), $pharma_id);
 	}
 
 	/**
@@ -57,6 +58,10 @@ class QuizzesModel {
 	 */
 	public static function insert(array $data) {
 		global $pdo;
+
+		if (empty($data['pharma_id'])) {
+			return false;
+		}
 
 		// Controllo su metadata: se è array o oggetto, lo codifichiamo in JSON
 		if (isset($data['metadata']) && (is_array($data['metadata']) || is_object($data['metadata']))) {
@@ -66,8 +71,8 @@ class QuizzesModel {
 		$data['created_at'] = date('Y-m-d H:i:s');
 		$data['updated_at'] = $data['created_at'];
 
-		$sql = "INSERT INTO jta_quizzes (date, points, metadata, created_at, updated_at)
-				VALUES (:date, :points, :metadata, :created_at, :updated_at)";
+		$sql = "INSERT INTO jta_quizzes (pharma_id, date, points, metadata, created_at, updated_at)
+				VALUES (:pharma_id, :date, :points, :metadata, :created_at, :updated_at)";
 
 		$stmt = $pdo->prepare($sql);
 		$stmt->execute($data);
@@ -78,7 +83,7 @@ class QuizzesModel {
 	/**
 	 * Aggiorna un quiz esistente.
 	 */
-	public static function update(string $date, array $data): bool {
+	public static function update(string $date, int $pharma_id, array $data): bool {
 		global $pdo;
 
 		// Controllo su metadata: se è array o oggetto, lo codifichiamo in JSON
@@ -94,8 +99,9 @@ class QuizzesModel {
 		}
 
 		$data['date'] = $date;
+		$data['pharma_id'] = $pharma_id;
 
-		$sql = "UPDATE jta_quizzes SET " . implode(", ", $fields) . " WHERE date = :date";
+		$sql = "UPDATE jta_quizzes SET " . implode(", ", $fields) . " WHERE date = :date AND pharma_id = :pharma_id";
 		$stmt = $pdo->prepare($sql);
 
 		return $stmt->execute($data);
@@ -117,10 +123,10 @@ class QuizzesModel {
 	 * Genera ed inserisce una nuova pillola quotidiana nel database
 	 * @return int|false
 	 */
-	public static function insertFromAI( string $date, int $points, string $topic ) {
+	public static function insertFromAI( string $date, int $points, string $topic, int $pharma_id ) {
 		if( ! isset($date) OR empty($date) ) $date = date('Y-m-d');
 		if( ! is_valid_date($date) ) return FALSE;
-		if( self::getByDate($date) ) return FALSE;
+		if( self::getByDate($date, $pharma_id) ) return FALSE;
 		if ( ! isset($topic) OR empty($topic) ) $topic = get_random_quiz_category();
 		if( empty($points) ) $points = get_option('point--quiz_daily', 3);
 		if( $points < 1 ) $points = get_option('point--quiz_daily', 3);
@@ -129,6 +135,7 @@ class QuizzesModel {
 		if( ! $quiz_data ) return FALSE;
 
 		return self::insert([
+			'pharma_id'=> $pharma_id,
 			'date'     => $date,
 			'points'   => $points,
 			'metadata' => $quiz_data,

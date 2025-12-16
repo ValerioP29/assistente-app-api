@@ -720,9 +720,12 @@ class SurveysModel {
 	 * Cerca un sondaggio per ID
 	 * @return array|false
 	 */
-	public static function findById($id) {
+	public static function findById($id, ?int $pharma_id = null) {
 		$surveys = self::data();
 		$survey = $surveys[$id] ?? FALSE;
+		if( $survey && $pharma_id && isset($survey['pharma_id']) && $survey['pharma_id'] != $pharma_id ){
+			return FALSE;
+		}
 		return $survey;
 	}
 
@@ -730,10 +733,13 @@ class SurveysModel {
 	 * Cerca un sondaggio per giorno
 	 * @return array|false
 	 */
-	public static function findByDate($date) {
+	public static function findByDate($date, ?int $pharma_id = null) {
 		$surveys = self::data();
 		$monday = get_week_start_date($date);
-		$survey = array_filter($surveys, function($_survey) use ($monday) {
+		$survey = array_filter($surveys, function($_survey) use ($monday, $pharma_id) {
+			if( $pharma_id && isset($_survey['pharma_id']) && $_survey['pharma_id'] != $pharma_id ){
+				return FALSE;
+			}
 			return $_survey['start_date'] ? (date('Y-m-d', strtotime($_survey['start_date'])) == $monday) : FALSE;
 		});
 		$survey = array_values($survey);
@@ -745,9 +751,12 @@ class SurveysModel {
 	 * Cerca i sondaggi "aperti" (basandosi su data inizio e data fine)
 	 * @return array|false
 	 */
-	public static function getAllOpen($date_time) {
+	public static function getAllOpen($date_time, ?int $pharma_id = null) {
 		$surveys = self::data();
-		$survey = array_filter($surveys, function($_survey) use ($date_time) {
+		$survey = array_filter($surveys, function($_survey) use ($date_time, $pharma_id) {
+			if( $pharma_id && isset($_survey['pharma_id']) && $_survey['pharma_id'] != $pharma_id ){
+				return FALSE;
+			}
 			if( isset($_survey['start_date']) && isset($_survey['end_date']) ){
 				return $_survey['start_date'] <= $date_time && $date_time <= $_survey['end_date'];
 			}elseif( isset($_survey['start_date']) ){
@@ -809,4 +818,3 @@ class SurveysModel {
 function normalize_survey_data(array $survey) {
 	return SurveysModel::normalize($survey);
 }
-

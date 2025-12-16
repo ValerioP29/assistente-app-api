@@ -63,12 +63,12 @@ document.addEventListener('pharmaciesLoaded', function (event) {
 			<div class="pharmacy-info">
 				<div class="name">${pharmacy.business_name}</div>
 			<!--	<p class="description">${pharmacy.description}</p> -->
-			<!--	<p class="contact"><i class="fa-solid fa-phone mx-2"></i> Telefono: ${preferred.phone_number} </p> -->
+			<!--	<p class="contact"><i class="fa-solid fa-phone mx-2"></i> Telefono: ${pharmacy.phone_number} </p> -->
            <p class="contact">
             <i class="fa-brands fa-whatsapp mx-2"></i> 
              WhatsApp: 
-             <a href="https://wa.me/${preferred.wa_number}"  target="_blank" rel="noopener">
-             ${preferred.wa_number}
+             <a href="https://wa.me/${pharmacy.wa_number}"  target="_blank" rel="noopener">
+             ${pharmacy.wa_number}
              </a>
           </p>
 				<div class="actions">

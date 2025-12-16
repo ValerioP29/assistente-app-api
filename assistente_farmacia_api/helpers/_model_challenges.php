@@ -4,9 +4,10 @@ class ChallengesModel {
 	/**
 	 * Restituisce tutte le sfide ordinate per data decrescente.
 	 */
-	public static function getAll(): array {
+	public static function getAll(int $pharma_id): array {
 		global $pdo;
-		$stmt = $pdo->query("SELECT * FROM jta_week_challenges ORDER BY date_start DESC");
+		$stmt = $pdo->prepare("SELECT * FROM jta_week_challenges WHERE pharma_id = :pharma_id ORDER BY date_start DESC");
+		$stmt->execute([':pharma_id' => $pharma_id]);
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		return $results ? $results : [];
 	}
@@ -14,32 +15,32 @@ class ChallengesModel {
 	/**
 	 * Restituisce una sfida corrispondente alla data di inizio indicata.
 	 */
-	public static function getByDate(string $date_start) {
+	public static function getByDate(string $date_start, int $pharma_id) {
 		global $pdo;
-		$stmt = $pdo->prepare("SELECT * FROM jta_week_challenges WHERE date_start = :date_start LIMIT 1");
-		$stmt->execute(['date_start' => get_week_start_date($date_start)]);
+		$stmt = $pdo->prepare("SELECT * FROM jta_week_challenges WHERE date_start = :date_start AND pharma_id = :pharma_id LIMIT 1");
+		$stmt->execute([':date_start' => get_week_start_date($date_start), ':pharma_id' => $pharma_id]);
 		return $stmt->fetch(PDO::FETCH_ASSOC) ?: false;
 	}
 
-	public static function getById( $id ) {
+	public static function getById( $id, int $pharma_id ) {
 		global $pdo;
-		$stmt = $pdo->prepare("SELECT * FROM jta_week_challenges WHERE id = :id LIMIT 1");
-		$stmt->execute(['id' => $id]);
+		$stmt = $pdo->prepare("SELECT * FROM jta_week_challenges WHERE id = :id AND pharma_id = :pharma_id LIMIT 1");
+		$stmt->execute([':id' => $id, ':pharma_id' => $pharma_id]);
 		return $stmt->fetch(PDO::FETCH_ASSOC) ?: FALSE;
 	}
 
 	/**
 	 * Restituisce la sfida relativa alla settimana corrente.
 	 */
-	public static function getCurrentWeek() {
-		return self::getByDate(get_week_start_date(date('Y-m-d')));
+	public static function getCurrentWeek(int $pharma_id) {
+		return self::getByDate(get_week_start_date(date('Y-m-d')), $pharma_id);
 	}
 
-	public static function getNextWeek() {
+	public static function getNextWeek(int $pharma_id) {
 		$dt = new DateTime();
 		$dt->modify('next monday');
 		$next_week = $dt->format('Y-m-d');
-		return self::getByDate(get_week_start_date($next_week));
+		return self::getByDate(get_week_start_date($next_week), $pharma_id);
 	}
 
 	/**
@@ -47,6 +48,10 @@ class ChallengesModel {
 	 */
 	public static function insert(array $data) {
 		global $pdo;
+
+		if (empty($data['pharma_id'])) {
+			return false;
+		}
 
 		if (empty($data['date_start'])) {
 			$data['date_start'] = get_week_start_date(date('Y-m-d'));
@@ -64,8 +69,8 @@ class ChallengesModel {
 
 		$data['created_at'] = $data['updated_at'] = date('Y-m-d H:i:s');
 
-		$sql = "INSERT INTO jta_week_challenges (date_start, points, title, description, instructions, reward, icon, metadata, created_at, updated_at)
-				VALUES (:date_start, :points, :title, :description, :instructions, :reward, :icon, :metadata, :created_at, :updated_at)";
+		$sql = "INSERT INTO jta_week_challenges (pharma_id, date_start, points, title, description, instructions, reward, icon, metadata, created_at, updated_at)
+				VALUES (:pharma_id, :date_start, :points, :title, :description, :instructions, :reward, :icon, :metadata, :created_at, :updated_at)";
 		$stmt = $pdo->prepare($sql);
 		$stmt->execute($data);
 		return (int) $pdo->lastInsertId();
@@ -74,7 +79,7 @@ class ChallengesModel {
 	/**
 	 * Aggiorna una sfida esistente tramite ID.
 	 */
-	public static function update(string $date, array $data): bool {
+	public static function update(string $date, int $pharma_id, array $data): bool {
 		global $pdo;
 
 		unset($json['progress']);
@@ -83,11 +88,12 @@ class ChallengesModel {
 
 		unset($data['created_at']);
 		$data['updated_at'] = date('Y-m-d H:i:s');
+		$data['pharma_id'] = $pharma_id;
 
 		$date = get_week_start_date($date);
 
 		$set = implode(', ', array_map(fn($k) => "$k = :$k", array_keys($data)));
-		$sql = "UPDATE jta_week_challenges SET $set WHERE date_start = :date";
+		$sql = "UPDATE jta_week_challenges SET $set WHERE date_start = :date AND pharma_id = :pharma_id";
 		$stmt = $pdo->prepare($sql);
 		return $stmt->execute($data);
 	}
@@ -127,11 +133,11 @@ class ChallengesModel {
 		];
 	}
 
-	public static function insertFromAI( string $date, int $points ) {
+	public static function insertFromAI( string $date, int $points, int $pharma_id ) {
 		if( ! isset($date) OR empty($date) ) $date = date('Y-m-d');
 		$date = get_week_start_date($date);
 		if( ! is_valid_date($date) ) return FALSE;
-		if( self::getByDate($date) ) return FALSE;
+		if( self::getByDate($date, $pharma_id) ) return FALSE;
 		if( empty($points) ) $points = get_option('point--challenge_daily', 1);
 		if( $points < 1 ) $points = get_option('point--challenge_daily', 1);
 
@@ -139,6 +145,7 @@ class ChallengesModel {
 		if( ! $data ) return FALSE;
 
 		return self::insert([
+			'pharma_id'    => $pharma_id,
 			'date_start'   => $date,
 			'points'       => $points,
 
