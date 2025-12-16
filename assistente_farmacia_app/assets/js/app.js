@@ -91,6 +91,47 @@ const AppURLs = {
 
 const dataStore = {};
 
+const PharmacyContext = {
+	keyData: () => 'jta-app-pharmacy-data',
+	keyId: () => 'jta-app-pharmacy-id',
+	getId() {
+		const savedId = localStorage.getItem(this.keyId());
+		return savedId ? parseInt(savedId, 10) : null;
+	},
+	getData() {
+		try {
+			const stored = localStorage.getItem(this.keyData());
+			return stored ? JSON.parse(stored) : null;
+		} catch (error) {
+			console.warn('Errore nella lettura della farmacia salvata', error);
+			return null;
+		}
+	},
+	set(pharma) {
+		if (!pharma || !pharma.id) return;
+		try {
+			localStorage.setItem(this.keyId(), pharma.id);
+			localStorage.setItem(this.keyData(), JSON.stringify(pharma));
+		} catch (error) {
+			console.warn('Impossibile salvare la farmacia preferita', error);
+		}
+		dataStore.pharma = pharma;
+		document.dispatchEvent(new CustomEvent('pharma:dataReady', {detail: pharma}));
+	},
+	clear() {
+		localStorage.removeItem(this.keyId());
+		localStorage.removeItem(this.keyData());
+	},
+	hydrate() {
+		const stored = this.getData();
+		if (stored && stored.id) {
+			dataStore.pharma = stored;
+		}
+	},
+};
+
+PharmacyContext.hydrate();
+
 const JWT = {
 	auth: {
 		key: () => 'jta-app-jwt',
@@ -112,6 +153,7 @@ function appLogout() {
 	saveAndRedirectAfterLogin();
 	JWT.auth.remove();
 	JWT.refresh.remove();
+	PharmacyContext.clear();
 	goTo(AppURLs.page.login());
 }
 
@@ -127,6 +169,7 @@ function appLogin(username, password) {
 		.then((res) => res.json())
 		.then((data) => {
 			if (data.access_token) {
+				PharmacyContext.clear();
 				JWT.auth.set(data.access_token);
 				JWT.refresh.set(data.refresh_token);
 
@@ -189,10 +232,17 @@ async function appRefreshToken() {
 }
 
 async function appFetchWithToken(url, options = {}) {
-	options.headers = {
+	const headers = {
 		...(options.headers || {}),
 		Authorization: 'Bearer ' + JWT.auth.get(),
 	};
+
+	const pharmacyId = PharmacyContext.getId() ?? dataStore?.pharma?.id;
+	if (pharmacyId) {
+		headers['X-Pharmacy-Id'] = pharmacyId;
+	}
+
+	options.headers = headers;
 
 	const res = await fetch(url, options);
 	let data = await res.json();
@@ -217,8 +267,15 @@ function appCheckAuth() {
 		.then((data) => {
 			if (data.status) {
 				dataStore.user = data.user;
-				dataStore.pharma = data.pharma;
-				document.dispatchEvent(new CustomEvent('appLoggedin', {detail: data}));
+				if (data.pharma) PharmacyContext.set(data.pharma);
+				document.dispatchEvent(
+					new CustomEvent('appLoggedin', {
+						detail: {
+							...data,
+							pharma: data.pharma ?? dataStore.pharma ?? PharmacyContext.getData(),
+						},
+					})
+				);
 				return;
 			}
 			document.dispatchEvent(new CustomEvent('appLoggedout'));
@@ -276,10 +333,14 @@ document.addEventListener('appLoggedin', function (event) {
 	const data = event.detail;
 
 	dataStore.user = data.user;
-	dataStore.pharma = data.pharma;
+	if (data.pharma) {
+		PharmacyContext.set(data.pharma);
+	} else if (!dataStore.pharma) {
+		const storedPharma = PharmacyContext.getData();
+		if (storedPharma) PharmacyContext.set(storedPharma);
+	}
 
 	document.dispatchEvent(new CustomEvent('user:dataReady', {detail: data.user}));
-	document.dispatchEvent(new CustomEvent('pharma:dataReady', {detail: data.pharma}));
 });
 
 document.addEventListener('DOMContentLoaded', function () {

@@ -24,7 +24,7 @@ function getAuthorizationHeader() {
 function setHeadersAPI() {
 	header("Access-Control-Allow-Origin: *");
 	header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
-	header("Access-Control-Allow-Headers: Content-Type, Authorization");
+	header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Pharmacy-Id, X-Pharma-Id");
 	header('Content-Type: application/json');
 	http_response_code(200);
 }

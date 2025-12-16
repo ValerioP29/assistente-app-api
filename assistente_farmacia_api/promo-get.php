@@ -18,6 +18,7 @@ if( ! $user ){
 
 $input = $_GET;
 $promo_id = $input['id'] ?? NULL;
+$promo_id = is_numeric($promo_id) ? (int) $promo_id : null;
 
 if( ! $promo_id ){
 	echo json_encode([

@@ -16,6 +16,7 @@ if( ! $user ){
 
 //------------------------------------------------
 
+$pharma = getMyPharma();
 $input = $_GET;
 $product_id = $input['id'] ?? NULL;
 
@@ -29,7 +30,7 @@ if( ! $product_id ){
 	exit();
 }
 
-$product = ProductsModel::findById( $product_id );
+$product = ProductsModel::findByIdForPharma( $pharma['id'], $product_id );
 if( ! $product ){
 	echo json_encode([
 		'code'    => 404,

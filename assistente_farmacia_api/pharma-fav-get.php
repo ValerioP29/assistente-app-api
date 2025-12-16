@@ -23,5 +23,5 @@ echo json_encode([
 	'code'   => 200,
 	'status' => true,
 	'message' => NULL,
-	'data'   => normalize_pharma_data($pharma),
+	'data'   => normalize_pharma_data($fav_pharma),
 ]);

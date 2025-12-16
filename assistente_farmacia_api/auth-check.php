@@ -5,7 +5,7 @@ $decoded = protectFileWithJWT();
 
 $user_id = $decoded->sub;
 $user = get_user_by_id($user_id);
-$pharma = get_fav_pharma_by_user_id( $user_id );
+$pharma = getMyPharma(NULL, true);
 
 if( ! $user ){
 	echo json_encode([
@@ -20,7 +20,6 @@ if( ! $user ){
 echo json_encode([
 	'code'    => 200,
 	'status'  => true,
-	'message' => 'Access granted',
 	'message' => 'Access granted',
 	'user'   => normalize_user_data($user),
 	'pharma' => normalize_pharma_data($pharma),

@@ -75,7 +75,9 @@ EOT;
 //------------------------------------------------
 
 $my_wa = get_my_wa();
-$pharma = getMyPharma();
+$pharma = $service_id && isset($service['pharma_id'])
+	? getMyPharma((int) $service['pharma_id'])
+	: getMyPharma();
 
 if( $service_id ){
 	$message = filter_comm_message( $message, get_my_id(), $pharma['id'], 'request--service' );
