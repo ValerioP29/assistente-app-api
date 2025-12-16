@@ -591,23 +591,27 @@ function normalize_user_profile_data($user_db) {
 function normalize_pharma_data( $pharma_db ){
 	if( ! $pharma_db ) return FALSE;
 
+	$wa_number = $pharma_db['wa_number'] ?? $pharma_db['phone_number'];
+	$img_bot    = get_pharma_img_src($pharma_db['id'], $pharma_db['img_bot'] ?? null, 'uploads/images/placeholder-assistente.jpg');
+	$img_avatar = get_pharma_img_src($pharma_db['id'], $pharma_db['img_avatar'] ?? null, 'uploads/images/placeholder-assistente.jpg');
+	$img_cover  = get_pharma_img_src($pharma_db['id'], $pharma_db['img_cover'] ?? null, 'uploads/images/placeholder-logo-farmacia.jpg');
+
 	$pharma = [
 		'id'            => (int) $pharma_db['id'],
 		'name'          => $pharma_db['slug_name'],
 		'business_name' => $pharma_db['business_name'],
 		'email'         => $pharma_db['email'],
 		'phone_number'  => $pharma_db['phone_number'],
-		'wa_number'     => $pharma_db['phone_number'],
+		'wa_number'     => $wa_number,
 		'description'   => $pharma_db['description'],
 
 		// 'image_bot'    => site_url().'/assets/pharmacies/'.$pharma_db['id'].'/'.$pharma_db['img_bot'],
 		// 'image_avatar' => site_url().'/assets/pharmacies/'.$pharma_db['id'].'/'.$pharma_db['img_avatar'],
 		// 'image_cover'  => site_url().'/assets/pharmacies/'.$pharma_db['id'].'/'.$pharma_db['img_cover'],
 		'image_logo'   => 'https://app.assistentefarmacia.it/panel/'.$pharma_db['logo'],
-		// 'image_bot'    => get_pharma_img_src($pharma_db['id'], $pharma_db['img_bot']),
-		'image_bot'    => 'https://assistentefarmacia.it/app-cliente-farmacia/img/Raffaella.jpg',
-		'image_avatar' => get_pharma_img_src($pharma_db['id'], $pharma_db['img_avatar']),
-		'image_cover'  => get_pharma_img_src($pharma_db['id'], $pharma_db['img_cover']),
+		'image_bot'    => $img_bot,
+		'image_avatar' => $img_avatar,
+		'image_cover'  => $img_cover,
 		'social_list'  => [],
 		'working_info' => [
 			'human' => format_schedule_human_friendly($pharma_db['working_info']),
@@ -1123,10 +1127,21 @@ function normalize_reminder_expiry_data( $reminder_db ){
 	return $reminder;
 }
 
-function get_pharma_img_src( $pharma_id = NULL, $filename = NULL ){
-	if( isset($pharma_id, $filename) ){
-		return rtrim(site_url(), '/').'/uploads/pharmacies/1/logo_farmacia_giovinazzi.png';
+function get_pharma_img_src( $pharma_id = NULL, $filename = NULL, $placeholder = NULL ){
+	if( empty($pharma_id) || empty($filename) ){
+		if (isset($filename) && filter_var($filename, FILTER_VALIDATE_URL)) {
+			return $filename;
+		}
+		if ($placeholder) {
+			return rtrim(site_url(), '/').'/'.ltrim($placeholder, '/');
+		}
+		return isset($filename) ? rtrim(site_url(), '/').'/'.ltrim($filename, '/') : null;
 	}
 
-	return;
+	if (filter_var($filename, FILTER_VALIDATE_URL)) {
+		return $filename;
+	}
+
+	$filename = ltrim($filename, '/');
+	return rtrim(site_url(), '/').'/uploads/pharmacies/'.$pharma_id.'/'.$filename;
 }
