@@ -12,7 +12,6 @@ $first_name  = isset($input['first_name']) ? ucwords(sanitize_string(trim($input
 $last_name   = isset($input['last_name']) ? ucwords(sanitize_string(trim($input['last_name']))) : '';
 $consents = $input['consents'] ?? [];
 $acceptMarketing = !empty($consents['accept_marketing']) ? 1 : 0;
-$pharma_id = isset($input['pharma_id']) ? (int) $input['pharma_id'] : null;
 
 if( get_option('registration_disabled', true) ){
 	echo json_encode([
@@ -133,17 +132,7 @@ if( get_option('registration_phone_is_unique', true) ){
 	}
 }
 
-$pharma = $pharma_id ? get_pharma_by_id($pharma_id) : null;
-if( ! $pharma ){
-	echo json_encode([
-		'code'    => 400,
-		'status'  => false,
-		'error'   => 'Bad Request',
-		'message' => 'Farmacia non valida.',
-	]);
-	exit;
-}
-
+$pharma_id = 1; // Farmacia Giovinazzi default
 $user_id = insert_user([
 	'slug_name'    => $username,
 	'password'     => $password,

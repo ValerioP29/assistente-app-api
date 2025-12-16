@@ -10,13 +10,11 @@ if( ! $user ){
 		'status'  => false,
 		'error'   => 'Invalid or expired token',
 		'message' => 'Accesso negato',
-]);
+	]);
 	exit();
 }
 
 //------------------------------------------------
-
-$pharma = getMyPharma();
 
 // Recupera i dati del questionario dall'utente
 $profiling_data = null;

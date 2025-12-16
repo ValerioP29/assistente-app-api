@@ -10,20 +10,18 @@ if( ! $user ){
 		'status'  => FALSE,
 		'error'   => 'Invalid or expired token',
 		'message' => 'Accesso negato',
-]);
+	]);
 	exit();
 }
 
 //------------------------------------------------
-
-$pharma = getMyPharma();
 
 $limit = isset($_GET['limit']) && is_numeric($_GET['limit']) ? (int) $_GET['limit'] : 28;
 if( $limit < 1 ) $limit = 1;
 if( $limit > 28 ) $limit = 28;
 
 // Recupera le pillole più recenti
-$pills = PillsModel::getLatest($limit, TRUE, (int) $pharma['id']);
+$pills = PillsModel::getLatest($limit);
 
 $my_args = get_my_profiling_args();
 if( ! empty($my_args) ){

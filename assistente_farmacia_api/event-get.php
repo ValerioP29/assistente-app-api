@@ -17,7 +17,6 @@ if( ! $user ){
 //------------------------------------------------
 
 $event_id = $_GET['id'] ?? NULL;
-$event_id = is_numeric($event_id) ? (int) $event_id : null;
 
 // Richiesta mal formata
 if( ! $event_id ){

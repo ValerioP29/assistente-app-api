@@ -51,27 +51,27 @@ class UserPointsModel {
 		return "SELECT * FROM jta_user_points_log WHERE deleted_at IS NULL";
 	}
 
-	public static function getByDay(int $userId, int $pharmaId, string $day): array {
+	public static function getByDay(int $userId, string $day): array {
 		global $pdo;
-		$sql = self::baseSelect() . " AND user_id = :user_id AND pharma_id = :pharma_id AND date = :day";
+		$sql = self::baseSelect() . " AND user_id = :user_id AND date = :day";
 		$stmt = $pdo->prepare($sql);
-		$stmt->execute(['user_id' => $userId, 'pharma_id' => $pharmaId, 'day' => $day]);
+		$stmt->execute(['user_id' => $userId, 'day' => $day]);
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
-	public static function getByMonth(int $userId, int $pharmaId, string $month): array {
+	public static function getByMonth(int $userId, string $month): array {
 		global $pdo;
-		$sql = self::baseSelect() . " AND user_id = :user_id AND pharma_id = :pharma_id AND DATE_FORMAT(date, '%Y-%m') = :month";
+		$sql = self::baseSelect() . " AND user_id = :user_id AND DATE_FORMAT(date, '%Y-%m') = :month";
 		$stmt = $pdo->prepare($sql);
-		$stmt->execute(['user_id' => $userId, 'pharma_id' => $pharmaId, 'month' => $month]);
+		$stmt->execute(['user_id' => $userId, 'month' => $month]);
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
-	public static function getByYear(int $userId, int $pharmaId, string $year): array {
+	public static function getByYear(int $userId, string $year): array {
 		global $pdo;
-		$sql = self::baseSelect() . " AND user_id = :user_id AND pharma_id = :pharma_id AND YEAR(date) = :year";
+		$sql = self::baseSelect() . " AND user_id = :user_id AND YEAR(date) = :year";
 		$stmt = $pdo->prepare($sql);
-		$stmt->execute(['user_id' => $userId, 'pharma_id' => $pharmaId, 'year' => $year]);
+		$stmt->execute(['user_id' => $userId, 'year' => $year]);
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
@@ -82,12 +82,12 @@ class UserPointsModel {
 	 * @param string $day
 	 * @return int Totale punti (0 se nessun record)
 	 */
-	public static function getSumByDay(int $userId, int $pharmaId, string $day): int {
+	public static function getSumByDay(int $userId, string $day): int {
 		global $pdo;
 		$sql = "SELECT COALESCE(SUM(points), 0) FROM jta_user_points_log 
-			WHERE deleted_at IS NULL AND user_id = :user_id AND pharma_id = :pharma_id AND date = :day";
+				WHERE deleted_at IS NULL AND user_id = :user_id AND date = :day";
 		$stmt = $pdo->prepare($sql);
-		$stmt->execute(['user_id' => $userId, 'pharma_id' => $pharmaId, 'day' => $day]);
+		$stmt->execute(['user_id' => $userId, 'day' => $day]);
 		return (int)$stmt->fetchColumn();
 	}
 
@@ -98,12 +98,12 @@ class UserPointsModel {
 	 * @param string $month
 	 * @return int Totale punti (0 se nessun record)
 	 */
-	public static function getSumByMonth(int $userId, int $pharmaId, string $month): int {
+	public static function getSumByMonth(int $userId, string $month): int {
 		global $pdo;
 		$sql = "SELECT COALESCE(SUM(points), 0) FROM jta_user_points_log 
-			WHERE deleted_at IS NULL AND user_id = :user_id AND pharma_id = :pharma_id AND DATE_FORMAT(date, '%Y-%m') = :month";
+				WHERE deleted_at IS NULL AND user_id = :user_id AND DATE_FORMAT(date, '%Y-%m') = :month";
 		$stmt = $pdo->prepare($sql);
-		$stmt->execute(['user_id' => $userId, 'pharma_id' => $pharmaId, 'month' => $month]);
+		$stmt->execute(['user_id' => $userId, 'month' => $month]);
 		return (int)$stmt->fetchColumn();
 	}
 
@@ -114,12 +114,12 @@ class UserPointsModel {
 	 * @param string $year
 	 * @return int Totale punti (0 se nessun record)
 	 */
-	public static function getSumByYear(int $userId, int $pharmaId, string $year): int {
+	public static function getSumByYear(int $userId, string $year): int {
 		global $pdo;
 		$sql = "SELECT COALESCE(SUM(points), 0) FROM jta_user_points_log 
-			WHERE deleted_at IS NULL AND user_id = :user_id AND pharma_id = :pharma_id AND YEAR(date) = :year";
+				WHERE deleted_at IS NULL AND user_id = :user_id AND YEAR(date) = :year";
 		$stmt = $pdo->prepare($sql);
-		$stmt->execute(['user_id' => $userId, 'pharma_id' => $pharmaId, 'year' => $year]);
+		$stmt->execute(['user_id' => $userId, 'year' => $year]);
 		return (int)$stmt->fetchColumn();
 	}
 

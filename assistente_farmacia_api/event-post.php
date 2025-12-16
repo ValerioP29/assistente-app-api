@@ -47,7 +47,7 @@ if( ! $event ){
 //------------------------------------------------
 
 $my_wa = get_my_wa();
-$pharma = getMyPharma($event['pharma_id']);
+$pharma = getMyPharma();
 
 $event_date = date('d/m/Y', strtotime($event['datetime_start']));
 

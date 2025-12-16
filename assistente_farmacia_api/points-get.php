@@ -10,19 +10,14 @@ if( ! $user ){
 		'status'  => FALSE,
 		'error'   => 'Invalid or expired token',
 		'message' => 'Accesso negato',
-]);
+	]);
 	exit();
 }
 
 //------------------------------------------------
 
-$pharma = getMyPharma();
-
-$current_month = date('Y-m');
-$points_current_month = UserPointsModel::getSumByMonth($user['id'], (int) $pharma['id'], $current_month);
-
 $data = [
-	'points'        => (int) $points_current_month,
+	'points'        => (int) $user['points_current_month'],
 	'goal'          => 500,
 	'rewardText'    => 'Un\'esclusiva sorpresa da scoprire in farmacia...',
 	'rewardNote'    => '* Fino ad esaurimento scorte...',

@@ -113,10 +113,6 @@ function update_user_init_profiling( $user_id = NULL, $profiling_data = NULL ){
 function insert_user( $params = [] ){
 	global $pdo;
 
-	if (empty($params['pharma_id'])) {
-		return false;
-	}
-
 	$hashedPassword = password_hash($params['password'], PASSWORD_DEFAULT);
 	$now = date('Y-m-d H:i:s');
 
@@ -146,7 +142,7 @@ function insert_user( $params = [] ){
 		':updated_at'    => $now,
 		':last_access'   => $now,
 
-		':starred_pharma'=> $params['pharma_id'],
+		':starred_pharma'=> $params['pharma_id'] ?? 1,
 		':accept_marketing'=> !empty($params['accept_marketing']) ? 1 : 0,
 	]);
 
@@ -397,87 +393,8 @@ function deleteUserPharmaRel(int $user_id, int $pharma_id): bool {
 	}
 }
 
-function get_request_pharma_id_from_header(): ?int {
-	$headers = function_exists('getallheaders') ? getallheaders() : [];
-
-	if (empty($headers)) {
-		foreach ($_SERVER as $name => $value) {
-			if (strpos($name, 'HTTP_') === 0) {
-				$key = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
-				$headers[$key] = $value;
-			}
-		}
-	}
-
-	$headers = array_change_key_case($headers, CASE_LOWER);
-	$candidates = [
-		$headers['x-pharmacy-id'] ?? null,
-		$headers['x-pharma-id'] ?? null,
-	];
-
-	foreach ($candidates as $candidate) {
-		if (!empty($candidate) && is_numeric($candidate) && (int) $candidate > 0) {
-			return (int) $candidate;
-		}
-	}
-
-	return null;
-}
-
-function user_can_access_pharma(int $user_id, int $pharma_id): bool {
-	$fav_pharma = get_fav_pharma_by_user_id($user_id);
-	if ($fav_pharma && (int) $fav_pharma['id'] === $pharma_id) {
-		return true;
-	}
-
-	return existsUserPharmaRel($user_id, $pharma_id);
-}
-
-function abort_with_pharma_error(int $code, string $message, string $error = null) {
-	http_response_code($code);
-	echo json_encode([
-		'code'    => $code,
-		'status'  => false,
-		'error'   => $error ?? $message,
-		'message' => $message,
-	]);
-	exit();
-}
-
-function getMyPharma(?int $pharma_id = null, bool $allow_fallback_to_favorite = false) {
-	$user_id = get_my_id();
-	if (!$user_id) {
-		abort_with_pharma_error(401, 'Utente non autorizzato.');
-	}
-
-	$requested_from_header = get_request_pharma_id_from_header();
-	if ($pharma_id && $requested_from_header && $requested_from_header !== $pharma_id) {
-		abort_with_pharma_error(403, 'Contesto farmacia non coerente con la richiesta.');
-	}
-
-	$requested_id = $pharma_id ?? $requested_from_header;
-
-	if (!$requested_id && $allow_fallback_to_favorite) {
-		$pharma = get_fav_pharma_by_user_id($user_id);
-		if ($pharma) {
-			return $pharma;
-		}
-	}
-
-	if (!$requested_id) {
-		abort_with_pharma_error(400, 'Intestazione X-Pharmacy-Id mancante.');
-	}
-
-	$pharma = get_pharma_by_id($requested_id);
-	if (!$pharma) {
-		abort_with_pharma_error(404, 'Farmacia non trovata.');
-	}
-
-	if (!user_can_access_pharma($user_id, $requested_id)) {
-		abort_with_pharma_error(403, 'Non sei autorizzato ad accedere a questa farmacia.');
-	}
-
-	return $pharma;
+function getMyPharma(){
+	return get_fav_pharma_by_user_id( get_my_id() );
 }
 
 
@@ -522,10 +439,8 @@ function get_daily_pill( $date = NULL ){
 function get_events(){
 	global $pdo;
 
-	$pharma = getMyPharma();
-
-	$stmt = $pdo->prepare("SELECT * FROM jta_events WHERE is_deleted = 0 AND pharma_id = :pharma_id ORDER BY `datetime_start` ASC");
-	$stmt->execute([':pharma_id' => $pharma['id']]);
+	$stmt = $pdo->prepare("SELECT * FROM jta_events WHERE is_deleted = 0 ORDER BY `datetime_start` ASC");
+	$stmt->execute();
 	$events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 	$events = array_map( function($_event){
@@ -543,13 +458,8 @@ function get_event_by_id( $event_id = NULL ){
 
 	global $pdo;
 
-	$pharma = getMyPharma();
-
-	$stmt = $pdo->prepare("SELECT * FROM jta_events WHERE is_deleted = 0 AND id = :event_id AND pharma_id = :pharma_id LIMIT 1");
-	$stmt->execute([
-		':event_id' => $event_id,
-		':pharma_id' => $pharma['id'],
-	]);
+	$stmt = $pdo->prepare("SELECT * FROM jta_events WHERE is_deleted = 0 AND id = ? LIMIT 1");
+	$stmt->execute([$event_id]);
 	$event = $stmt->fetch(PDO::FETCH_ASSOC);
 
 	if( $event && ! empty($event['img_cover']) ){
@@ -562,10 +472,8 @@ function get_event_by_id( $event_id = NULL ){
 function get_services(){
 	global $pdo;
 
-	$pharma = getMyPharma();
-
-	$stmt = $pdo->prepare("SELECT * FROM jta_services WHERE is_deleted = 0 AND pharma_id = :pharma_id ORDER BY title ASC");
-	$stmt->execute([':pharma_id' => $pharma['id']]);
+	$stmt = $pdo->prepare("SELECT * FROM jta_services WHERE is_deleted = 0 ORDER BY title ASC");
+	$stmt->execute();
 	$services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 	$services = array_map( function($_service){
@@ -583,13 +491,8 @@ function get_service_by_id( $service_id = NULL ){
 
 	global $pdo;
 
-	$pharma = getMyPharma();
-
-	$stmt = $pdo->prepare("SELECT * FROM jta_services WHERE is_deleted = 0 AND id = :service_id AND pharma_id = :pharma_id LIMIT 1");
-	$stmt->execute([
-		':service_id' => $service_id,
-		':pharma_id' => $pharma['id'],
-	]);
+	$stmt = $pdo->prepare("SELECT * FROM jta_services WHERE is_deleted = 0 AND id = ? LIMIT 1");
+	$stmt->execute([$service_id]);
 	$service = $stmt->fetch(PDO::FETCH_ASSOC);
 
 	return $service;
@@ -1221,10 +1124,9 @@ function normalize_reminder_expiry_data( $reminder_db ){
 }
 
 function get_pharma_img_src( $pharma_id = NULL, $filename = NULL ){
-	if( empty($pharma_id) || empty($filename) ){
-		return rtrim(site_url(), '/').'/uploads/images/placeholder-pharmacy.jpg';
+	if( isset($pharma_id, $filename) ){
+		return rtrim(site_url(), '/').'/uploads/pharmacies/1/logo_farmacia_giovinazzi.png';
 	}
 
-	$clean_filename = ltrim($filename, '/');
-	return rtrim(site_url(), '/').'/uploads/pharmacies/'.$pharma_id.'/'.$clean_filename;
+	return;
 }

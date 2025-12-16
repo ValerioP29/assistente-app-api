@@ -2,25 +2,15 @@
 require_once('_api_bootstrap.php');
 setHeadersAPI();
 
-$decoded = protectFileWithJWT();
-$user = get_my_data();
-if( ! $user ){
-	echo json_encode([
-		'code'    => 401,
-		'status'  => FALSE,
-		'error'   => 'Invalid or expired token',
-		'message' => 'Accesso negato',
-	]);
-	exit();
-}
+// $decoded = protectFileWithJWT();
+// $user = get_my_data();
 
 //------------------------------------------------
 
 $pharma_slug = $_GET['id'] ?? NULL;
-$pharma_id = is_numeric($pharma_slug) ? (int) $pharma_slug : null;
 
 // Richiesta mal formata
-if( ! $pharma_id ){
+if( ! $pharma_slug ){
 	echo json_encode([
 		'code'    => 400,
 		'status'  => FALSE,
@@ -30,7 +20,7 @@ if( ! $pharma_id ){
 	exit();
 }
 
-$pharma = getMyPharma( $pharma_id );
+$pharma = get_pharma_by_id( $pharma_slug );
 
 if( ! $pharma ){
 	echo json_encode([

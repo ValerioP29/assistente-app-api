@@ -34,7 +34,7 @@ if ($now >= $start && $now <= $end) {
 // $input = json_decode(file_get_contents("php://input"), TRUE);
 
 $pharma = getMyPharma();
-$quiz = QuizzesModel::getLastAvailable(TRUE, (int) $pharma['id']);
+$quiz = QuizzesModel::getLastAvailable();
 $points = $quiz? $quiz['points'] : 0;
 
 $can_give_points = ! UserPointsModel::hasEntryForDate($user['id'], $pharma['id'], 'quiz_daily');

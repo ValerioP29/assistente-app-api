@@ -17,7 +17,6 @@ if( ! $user ){
 //------------------------------------------------
 
 $service_id = $_GET['id'] ?? NULL;
-$service_id = is_numeric($service_id) ? (int) $service_id : null;
 
 // Richiesta mal formata
 if( ! $service_id ){

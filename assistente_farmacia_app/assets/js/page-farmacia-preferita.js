@@ -111,10 +111,7 @@ function setPreferredPharmacy(pharmacyId) {
 		.then((data) => {
 			if (data.status) {
 				showToast('Nuova farmacia preferita aggiornata', 'success');
-				if (data.data) {
-					PharmacyContext.set(data.data);
-				}
-				window.location.reload();
+				fetchPharmacies();
 			} else {
 				handleError('Errore: non è stato possibile impostare la farmacia preferita.');
 			}

@@ -10,13 +10,9 @@ if( ! $user ){
 		'status'  => FALSE,
 		'error'   => 'Invalid or expired token',
 		'message' => 'Accesso negato',
-]);
+	]);
 	exit();
 }
-
-//------------------------------------------------
-
-$pharma = getMyPharma();
 
 //------------------------------------------------
 
@@ -48,9 +44,9 @@ if ( $date && !is_valid_date($date) ) {
 }
 
 if ( $date ) {
-	$daily_pill = PillsModel::findByDate($date, (int) $pharma['id']);
+	$daily_pill = PillsModel::findByDate($date);
 }elseif ( $id ) {
-	$daily_pill = PillsModel::findById($id, (int) $pharma['id']);
+	$daily_pill = PillsModel::findById($id);
 }else{
 	echo json_encode([
 		'code'    => 400,
