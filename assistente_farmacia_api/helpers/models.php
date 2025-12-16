@@ -593,8 +593,9 @@ function normalize_pharma_data( $pharma_db ){
 
 	$wa_number = $pharma_db['wa_number'] ?? $pharma_db['phone_number'];
 	$img_bot    = get_pharma_img_src($pharma_db['id'], $pharma_db['img_bot'] ?? null, 'uploads/images/placeholder-assistente.jpg');
-	$img_avatar = get_pharma_img_src($pharma_db['id'], $pharma_db['img_avatar'] ?? null, 'uploads/images/placeholder-assistente.jpg');
+	$img_avatar = get_pharma_img_src($pharma_db['id'], $pharma_db['img_avatar'] ?? null, 'uploads/images/placeholder-assistente.jpg', 'avatar');
 	$img_cover  = get_pharma_img_src($pharma_db['id'], $pharma_db['img_cover'] ?? null, 'uploads/images/placeholder-logo-farmacia.jpg');
+	$img_logo   = get_pharma_img_src($pharma_db['id'], $pharma_db['logo'] ?? null, 'uploads/images/placeholder-logo-farmacia.jpg', 'logo');
 
 	$pharma = [
 		'id'            => (int) $pharma_db['id'],
@@ -608,7 +609,7 @@ function normalize_pharma_data( $pharma_db ){
 		// 'image_bot'    => site_url().'/assets/pharmacies/'.$pharma_db['id'].'/'.$pharma_db['img_bot'],
 		// 'image_avatar' => site_url().'/assets/pharmacies/'.$pharma_db['id'].'/'.$pharma_db['img_avatar'],
 		// 'image_cover'  => site_url().'/assets/pharmacies/'.$pharma_db['id'].'/'.$pharma_db['img_cover'],
-		'image_logo'   => 'https://app.assistentefarmacia.it/panel/'.$pharma_db['logo'],
+		'image_logo'   => $img_logo,
 		'image_bot'    => $img_bot,
 		'image_avatar' => $img_avatar,
 		'image_cover'  => $img_cover,
@@ -1127,7 +1128,24 @@ function normalize_reminder_expiry_data( $reminder_db ){
 	return $reminder;
 }
 
-function get_pharma_img_src( $pharma_id = NULL, $filename = NULL, $placeholder = NULL ){
+function get_pharma_img_src( $pharma_id = NULL, $filename = NULL, $placeholder = NULL, $type = NULL ){
+	$type = $type ? strtolower($type) : NULL;
+
+	$pharma_assets = [
+		1 => [
+			'logo'   => 'assets/images/assistente-farmacia-logo.png',
+			'avatar' => 'assets/images/assistente_ott25_baloon_raffaella.png',
+		],
+		2 => [
+			'logo'   => 'assets/images/farmacia_ai_gemelli_logo___payoff.png',
+			'avatar' => 'assets/images/avatar_bozza02.png',
+		],
+	];
+
+	if ($pharma_id && $type && isset($pharma_assets[$pharma_id][$type])) {
+		return rtrim(site_url(), '/').'/'.ltrim($pharma_assets[$pharma_id][$type], '/');
+	}
+
 	if( empty($pharma_id) || empty($filename) ){
 		if (isset($filename) && filter_var($filename, FILTER_VALIDATE_URL)) {
 			return $filename;
