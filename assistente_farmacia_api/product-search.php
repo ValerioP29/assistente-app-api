@@ -19,6 +19,7 @@ if( ! $user ){
 $input = $_GET;
 $search_term = trim($input['search'] ?? '');
 $pharma_id = (int)($input['pharma_id'] ?? 0);
+$requested_header_pharma = get_request_pharma_id_from_header();
 
 // Validazione input
 if( empty($search_term) || $pharma_id <= 0 ){
@@ -32,6 +33,11 @@ if( empty($search_term) || $pharma_id <= 0 ){
 }
 
 //------------------------------------------------
+
+$pharma = getMyPharma($pharma_id);
+if( $requested_header_pharma && $requested_header_pharma !== $pharma['id'] ){
+	abort_with_pharma_error(403, 'Contesto farmacia non coerente con la richiesta.');
+}
 
 try {
 	global $pdo;

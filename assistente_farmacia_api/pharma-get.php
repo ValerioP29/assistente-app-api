@@ -17,6 +17,7 @@ if( ! $user ){
 //------------------------------------------------
 
 $pharma_id = $_GET['id'] ?? NULL;
+$pharma_id = is_numeric($pharma_id) ? (int) $pharma_id : null;
 
 // Richiesta mal formata
 if( ! $pharma_id ){
@@ -29,7 +30,7 @@ if( ! $pharma_id ){
 	exit();
 }
 
-$pharma = get_pharma_by_id( $pharma_id );
+$pharma = getMyPharma( $pharma_id );
 if( ! $pharma ){
 	echo json_encode([
 		'code'    => 404,

@@ -129,6 +129,24 @@ class ProductsModel {
 		}
 	}
 
+	public static function findByIdForPharma(int $pharma_id, int $product_id) {
+		global $pdo;
+
+		try {
+			$sql = "SELECT * FROM jta_pharma_prods WHERE id = :id AND pharma_id = :pharma_id AND is_active = 1";
+			$stmt = $pdo->prepare($sql);
+			$stmt->execute([
+				':id' => $product_id,
+				':pharma_id' => $pharma_id,
+			]);
+
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+			return $result ? $result : false;
+		} catch (Exception $e) {
+			return false;
+		}
+	}
+
 	public static function findByIds($ids) {
 		$products = [];
 
