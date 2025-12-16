@@ -16,7 +16,8 @@ if( ! $user ){
 
 //------------------------------------------------
 
-$events = get_events((int) $user['starred_pharma']);
+$pharma = getMyPharma();
+$events = get_events((int) $pharma['id']);
 
 echo json_encode([
 	'code'   => 200,
