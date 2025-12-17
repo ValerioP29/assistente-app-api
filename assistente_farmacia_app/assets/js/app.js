@@ -216,6 +216,8 @@ function appCheckAuth() {
 	appFetchWithToken(AppURLs.api.auth())
 		.then((data) => {
 			if (data.status) {
+				dataStore.user = data.user;
+				dataStore.pharma = data.pharma;
 				document.dispatchEvent(new CustomEvent('appLoggedin', {detail: data}));
 				return;
 			}

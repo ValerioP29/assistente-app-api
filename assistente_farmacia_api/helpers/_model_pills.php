@@ -10,17 +10,13 @@ class PillsModel {
 		global $pdo;
 
 		try {
-			if (empty($data['pharma_id'])) {
-				return false;
-			}
 			$stmt = $pdo->prepare("INSERT INTO jta_daily_pills (
-				pharma_id, day, category, title, excerpt, content, metadata, is_done
+				day, category, title, excerpt, content, metadata, is_done
 			) VALUES (
-				:pharma_id, :day, :category, :title, :excerpt, :content, :metadata, :is_done
+				:day, :category, :title, :excerpt, :content, :metadata, :is_done
 			)");
 
 			$stmt->execute([
-				':pharma_id'=> $data['pharma_id'],
 				':day'      => $data['day'],
 				':category' => $data['category'],
 				':title'    => $data['title'],
@@ -40,7 +36,7 @@ class PillsModel {
 	 * Aggiorna una pillola esistente
 	 * @return bool
 	 */
-	public static function update(int $id, int $pharma_id, array $data): bool {
+	public static function update(int $id, array $data): bool {
 		global $pdo;
 
 		try {
@@ -56,8 +52,7 @@ class PillsModel {
 			}
 
 			$values[":id"] = $id;
-			$values[":pharma_id"] = $pharma_id;
-			$sql = "UPDATE jta_daily_pills SET " . implode(", ", $fields) . " WHERE id = :id AND pharma_id = :pharma_id";
+			$sql = "UPDATE jta_daily_pills SET " . implode(", ", $fields) . " WHERE id = :id";
 			$stmt = $pdo->prepare($sql);
 
 			return $stmt->execute($values);
@@ -75,18 +70,18 @@ class PillsModel {
 	 * @param bool $hard_delete
 	 * @return bool
 	 */
-	public static function delete(int $id, int $pharma_id, bool $hard_delete = false): bool {
+	public static function delete(int $id, bool $hard_delete = false): bool {
 		global $pdo;
 
 		try {
 			if ($hard_delete) {
-				$stmt = $pdo->prepare("DELETE FROM jta_daily_pills WHERE id = :id AND pharma_id = :pharma_id");
-				return $stmt->execute([':id' => $id, ':pharma_id' => $pharma_id]);
+				$stmt = $pdo->prepare("DELETE FROM jta_daily_pills WHERE id = :id");
+				return $stmt->execute([':id' => $id]);
 			}
 
 			// Soft delete
-			$stmt = $pdo->prepare("UPDATE jta_daily_pills SET deleted_at = NOW() WHERE id = :id AND pharma_id = :pharma_id");
-			return $stmt->execute([':id' => $id, ':pharma_id' => $pharma_id]);
+			$stmt = $pdo->prepare("UPDATE jta_daily_pills SET deleted_at = NOW() WHERE id = :id");
+			return $stmt->execute([':id' => $id]);
 
 		} catch (Exception $e) {
 			return false;
@@ -99,20 +94,19 @@ class PillsModel {
 	 * @param string $date Data da cercare (formato YYYY-MM-DD)
 	 * @return array|false
 	 */
-	public static function findByDate(string $date, int $pharma_id) {
+	public static function findByDate(string $date) {
 		global $pdo;
 
 		try {
 			$stmt = $pdo->prepare("
 				SELECT * FROM jta_daily_pills 
 				WHERE day = :day 
-				AND pharma_id = :pharma_id
 				AND deleted_at IS NULL 
 				AND day <= CURDATE() 
 				AND is_done = 1
 				LIMIT 1
 			");
-			$stmt->execute([':day' => $date, ':pharma_id' => $pharma_id]);
+			$stmt->execute([':day' => $date]);
 			$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
 			if ($row && !empty($row['metadata'])) {
@@ -132,20 +126,19 @@ class PillsModel {
 	 * @param $id ID da cercare
 	 * @return array|false
 	 */
-	public static function findById($id, int $pharma_id) {
+	public static function findById($id) {
 		global $pdo;
 
 		try {
 			$stmt = $pdo->prepare("
 				SELECT * FROM jta_daily_pills 
 				WHERE id = :id 
-				AND pharma_id = :pharma_id
 				AND deleted_at IS NULL 
 				AND day <= CURDATE() 
 				AND is_done = 1
 				LIMIT 1
 			");
-			$stmt->execute([':id' => $id, ':pharma_id' => $pharma_id]);
+			$stmt->execute([':id' => $id]);
 			$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
 			if ($row && !empty($row['metadata'])) {
@@ -165,19 +158,18 @@ class PillsModel {
 	 * @param string $date Data da cercare (formato YYYY-MM-DD)
 	 * @return array
 	 */
-	public static function findGroupByDate(string $date, int $pharma_id) {
+	public static function findGroupByDate(string $date) {
 		global $pdo;
 
 		try {
 			$stmt = $pdo->prepare("
 				SELECT * FROM jta_daily_pills 
 				WHERE day = :day 
-				AND pharma_id = :pharma_id
 				AND deleted_at IS NULL 
 				AND day <= CURDATE() 
 				AND is_done = 1
 			");
-			$stmt->execute([':day' => $date, ':pharma_id' => $pharma_id]);
+			$stmt->execute([':day' => $date]);
 			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 			foreach( $rows AS $_index => $_row ){
@@ -200,32 +192,29 @@ class PillsModel {
 	 * @param int $limit Numero massimo di risultati da restituire
 	 * @return array
 	 */
-	public static function getLatest(int $limit, int $pharma_id, bool $not_future = TRUE ): array {
+	public static function getLatest(int $limit, bool $not_future = TRUE ): array {
 		global $pdo;
 
 		try {
-                        if( $not_future ){
-                                $stmt = $pdo->prepare("
-                                        SELECT * FROM jta_daily_pills
-                                        WHERE deleted_at IS NULL
-                                        AND (pharma_id = :pharma_id OR (:pharma_id = 1 AND pharma_id IS NULL))
-                                        AND day <= CURDATE()
-                                        AND is_done = 1
-                                        ORDER BY day DESC
-                                        LIMIT :limit
-                                ");
-                        }else{
-                                $stmt = $pdo->prepare("
-                                        SELECT * FROM jta_daily_pills
-                                        WHERE deleted_at IS NULL
-                                        AND (pharma_id = :pharma_id OR (:pharma_id = 1 AND pharma_id IS NULL))
-                                        AND is_done = 1
-                                        ORDER BY day DESC
-                                        LIMIT :limit
-                                ");
-                        }
+			if( $not_future ){
+				$stmt = $pdo->prepare("
+					SELECT * FROM jta_daily_pills 
+					WHERE deleted_at IS NULL 
+					AND day <= CURDATE()
+					AND is_done = 1
+					ORDER BY day DESC 
+					LIMIT :limit
+				");
+			}else{
+				$stmt = $pdo->prepare("
+					SELECT * FROM jta_daily_pills 
+					WHERE deleted_at IS NULL 
+					AND is_done = 1
+					ORDER BY day DESC 
+					LIMIT :limit
+				");
+			}
 
-			$stmt->bindValue(':pharma_id', $pharma_id, PDO::PARAM_INT);
 			$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
 			$stmt->execute();
 
@@ -240,7 +229,7 @@ class PillsModel {
 	 *
 	 * @return array
 	 */
-	public static function getLastGroup( int $pharma_id, $not_future = TRUE ) {
+	public static function getLastGroup( $not_future = TRUE ) {
 		global $pdo;
 
 		try {
@@ -248,13 +237,11 @@ class PillsModel {
 				$stmt = $pdo->prepare("
 					SELECT * FROM jta_daily_pills
 					WHERE deleted_at IS NULL
-					AND pharma_id = :pharma_id
 					AND is_done = 1
 					AND day = (
 						SELECT MAX(day)
 						FROM jta_daily_pills
 						WHERE deleted_at IS NULL
-						AND pharma_id = :pharma_id
 						AND is_done = 1
 						AND day <= CURDATE()
 					)
@@ -263,19 +250,17 @@ class PillsModel {
 				$stmt = $pdo->prepare("
 					SELECT * FROM jta_daily_pills
 					WHERE deleted_at IS NULL
-					AND pharma_id = :pharma_id
 					AND is_done = 1
 					AND day = (
 						SELECT MAX(day)
 						FROM jta_daily_pills
 						WHERE deleted_at IS NULL
-						AND pharma_id = :pharma_id
 						AND is_done = 1
 					)
 				");
 			}
 
-			$stmt->execute([':pharma_id' => $pharma_id]);
+			$stmt->execute();
 			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 			foreach( $rows AS $_index => $_row ){
@@ -300,21 +285,19 @@ class PillsModel {
 	 * @param string $to   Data fine (formato 'YYYY-MM-DD')
 	 * @return array
 	 */
-	public static function getByDateRange(string $from, string $to, int $pharma_id): array {
+	public static function getByDateRange(string $from, string $to): array {
 		global $pdo;
 
 		try {
 			$stmt = $pdo->prepare("
 				SELECT * FROM jta_daily_pills 
 				WHERE deleted_at IS NULL 
-				AND pharma_id = :pharma_id
 				AND day BETWEEN :from AND :to
 				AND day <= CURDATE()
 				AND is_done = 1
 				ORDER BY day ASC
 			");
 			$stmt->execute([
-				':pharma_id' => $pharma_id,
 				':from' => $from,
 				':to'   => $to
 			]);
@@ -329,12 +312,11 @@ class PillsModel {
 	 * Restituisce tutte le pillole attive, escludendo eventuali date future.
 	 * @return array
 	 */
-	public static function all(int $pharma_id): array {
+	public static function all(): array {
 		global $pdo;
 
 		try {
-			$stmt = $pdo->prepare("SELECT * FROM jta_daily_pills WHERE deleted_at IS NULL AND pharma_id = :pharma_id AND day <= CURDATE() AND is_done = 1 ORDER BY day DESC");
-			$stmt->execute([':pharma_id' => $pharma_id]);
+			$stmt = $pdo->query("SELECT * FROM jta_daily_pills WHERE deleted_at IS NULL AND day <= CURDATE() AND is_done = 1 ORDER BY day DESC");
 			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 			foreach ($rows as &$row) {
@@ -355,19 +337,17 @@ class PillsModel {
 	 *
 	 * @return array|false
 	 */
-	public static function getRandom(int $pharma_id) {
+	public static function getRandom() {
 		global $pdo;
 
-		$stmt = $pdo->prepare("
+		$stmt = $pdo->query("
 			SELECT * FROM jta_daily_pills
 			WHERE deleted_at IS NULL
-			AND pharma_id = :pharma_id
 			AND day <= CURDATE()
 			AND is_done = 1
 			ORDER BY RAND()
 			LIMIT 1
 		");
-		$stmt->execute([':pharma_id' => $pharma_id]);
 		return $stmt->fetch(PDO::FETCH_ASSOC) ?: false;
 	}
 
@@ -376,16 +356,16 @@ class PillsModel {
 	 * @param string $category
 	 * @return array|false
 	 */
-	public static function getRandomByCategory(string $category, int $pharma_id) {
+	public static function getRandomByCategory(string $category) {
 		global $pdo;
 
 		$stmt = $pdo->prepare("
 			SELECT * FROM jta_daily_pills
-			WHERE deleted_at IS NULL AND day <= CURDATE() AND category = :category AND pharma_id = :pharma_id
+			WHERE deleted_at IS NULL AND day <= CURDATE() AND category = :category
 			ORDER BY RAND()
 			LIMIT 1
 		");
-		$stmt->execute([':category' => $category, ':pharma_id' => $pharma_id]);
+		$stmt->execute([':category' => $category]);
 		return $stmt->fetch(PDO::FETCH_ASSOC) ?: false;
 	}
 
@@ -394,16 +374,16 @@ class PillsModel {
 	 * @param string $category
 	 * @return array|false
 	 */
-	public static function getLastByCategory(string $category, int $pharma_id) {
+	public static function getLastByCategory(string $category) {
 		global $pdo;
 
 		$stmt = $pdo->prepare("
 			SELECT * FROM jta_daily_pills
-			WHERE deleted_at IS NULL AND day <= CURDATE() AND is_done = 1 AND category = :category AND pharma_id = :pharma_id
+			WHERE deleted_at IS NULL AND day <= CURDATE() AND is_done = 1 AND category = :category
 			ORDER BY day DESC
 			LIMIT 1
 		");
-		$stmt->execute([':category' => $category, ':pharma_id' => $pharma_id]);
+		$stmt->execute([':category' => $category]);
 		return $stmt->fetch(PDO::FETCH_ASSOC) ?: false;
 	}
 
@@ -413,12 +393,12 @@ class PillsModel {
 	 * @param int|null $limit
 	 * @return array
 	 */
-	public static function getAllByCategory(string $category, int $limit, int $pharma_id): array {
+	public static function getAllByCategory(string $category, int $limit): array {
 		global $pdo;
 
 		$sql = "
 			SELECT * FROM jta_daily_pills
-			WHERE deleted_at IS NULL AND day <= CURDATE() AND is_done = 1 AND category = :category AND pharma_id = :pharma_id
+			WHERE deleted_at IS NULL AND day <= CURDATE() AND is_done = 1 AND category = :category
 			ORDER BY day DESC
 		";
 		if (!is_null($limit)) {
@@ -431,7 +411,6 @@ class PillsModel {
 			$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
 		}
 
-		$stmt->bindValue(':pharma_id', $pharma_id, PDO::PARAM_INT);
 		$stmt->execute();
 		return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
@@ -440,16 +419,15 @@ class PillsModel {
 	 * Restituisce un array con tutte le categorie uniche presenti (non eliminate), ma non con data futura.
 	 * @return array
 	 */
-	public static function getDistinctCategories(int $pharma_id): array {
+	public static function getDistinctCategories(): array {
 		global $pdo;
 
-		$stmt = $pdo->prepare("
+		$stmt = $pdo->query("
 			SELECT DISTINCT category
 			FROM jta_daily_pills
-			WHERE deleted_at IS NULL AND day <= CURDATE() AND pharma_id = :pharma_id
+			WHERE deleted_at IS NULL AND day <= CURDATE()
 			ORDER BY category ASC
 		");
-		$stmt->execute([':pharma_id' => $pharma_id]);
 
 		$categories = $stmt->fetchAll(PDO::FETCH_COLUMN);
 		return $categories ?: [];
@@ -459,17 +437,17 @@ class PillsModel {
 	 * Genera ed inserisce una nuova pillola quotidiana nel database
 	 * @return int|false
 	 */
-	public static function insertFromAI( string $date, string $category, int $pharma_id ) {
+	public static function insertFromAI( string $date, string $category ) {
 		if( ! isset($date) OR empty($date) ) $date = date('Y-m-d');
 		if( ! is_valid_date($date) ) return FALSE;
-		if( self::findByDate($date, $pharma_id) ) return FALSE;
+		if( self::findByDate($date) ) return FALSE;
 		if( ! isset($category) OR empty($category) ) $category = get_random_profiling_category();
 
 		$pill_data = openai_generate_daily_pill( $date, $category );
 
 		if( ! $pill_data ) return FALSE;
 		// $pill_data['metadata'] = $pill_data;
-		return self::insert(array_merge($pill_data, ['pharma_id' => $pharma_id]));
+		return self::insert($pill_data);
 	}
 
 	/**
@@ -479,7 +457,7 @@ class PillsModel {
 	 * @param string $category categoria da cercare
 	 * @return array|false
 	 */
-	private static function _check_pill_for_generation(string $date, string $category, int $pharma_id) {
+	private static function _check_pill_for_generation(string $date, string $category) {
 		global $pdo;
 
 		try {
@@ -487,13 +465,11 @@ class PillsModel {
 				SELECT * FROM jta_daily_pills 
 				WHERE deleted_at IS NULL 
 				AND day = :day 
-				AND pharma_id = :pharma_id
 				AND category = :category
 				LIMIT 1
 			");
 			$stmt->execute([
 				':day' => $date,
-				':pharma_id' => $pharma_id,
 				':category' => $category,
 			]);
 			$row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -513,17 +489,16 @@ class PillsModel {
 	 * Genera pillole vuote per una giornata
 	 * @return true|false
 	 */
-	public static function generateEmptyPillsByDate( string $date, int $pharma_id ) {
+	public static function generateEmptyPillsByDate( string $date ) {
 		if( ! isset($date) OR empty($date) ) $date = date('Y-m-d');
 		if( ! is_valid_date($date) ) return FALSE;
 
 		$cats = get_profiling_categories();
 
 		foreach( $cats AS $_cat_name ){
-			if( self::_check_pill_for_generation($date, $_cat_name, $pharma_id) ) continue;
+			if( self::_check_pill_for_generation($date, $_cat_name) ) continue;
 
 			self::insert([
-				'pharma_id' => $pharma_id,
 				'day'      => $date,
 				'category' => $_cat_name,
 				'title'    => '',
@@ -537,23 +512,22 @@ class PillsModel {
 		return TRUE;
 	}
 
-	public static function populateAnEmptyPill(int $pharma_id) {
+	public static function populateAnEmptyPill() {
 		global $pdo;
 
 		try {
 			$stmt = $pdo->prepare("
 				SELECT * FROM jta_daily_pills 
 				WHERE deleted_at IS NULL 
-				AND pharma_id = :pharma_id
 				AND is_done = 0
 				LIMIT 1
 			");
-			$stmt->execute([':pharma_id' => $pharma_id]);
+			$stmt->execute();
 			$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
 			if ($row) {
 				$pill_data = openai_generate_daily_pill( $row['day'], $row['category'] );
-				self::update( $row['id'], $pharma_id, [
+				self::update( $row['id'], [
 					'title'    => $pill_data['title'],
 					'excerpt'  => $pill_data['excerpt'],
 					'content'  => $pill_data['content'],
@@ -569,12 +543,12 @@ class PillsModel {
 
 	}
 
-	public static function countEmptyPills(int $pharma_id) {
+	public static function countEmptyPills() {
 		global $pdo;
 		
-		$sql = "SELECT COUNT(*) FROM jta_daily_pills WHERE is_done = 0 AND pharma_id = :pharma_id";
+		$sql = "SELECT COUNT(*) FROM jta_daily_pills WHERE is_done = 0";
 		$stmt = $pdo->prepare($sql);
-		$stmt->execute([':pharma_id' => $pharma_id]);
+		$stmt->execute();
 		
 		return (int) $stmt->fetchColumn();
 	}

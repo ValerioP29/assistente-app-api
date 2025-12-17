@@ -436,11 +436,11 @@ function get_daily_pill( $date = NULL ){
 	return FALSE;
 }
 
-function get_events( $pharma_id ){
+function get_events(){
 	global $pdo;
 
-	$stmt = $pdo->prepare("SELECT * FROM jta_events WHERE is_deleted = 0 AND pharma_id = :pharma_id ORDER BY `datetime_start` ASC");
-	$stmt->execute([':pharma_id' => $pharma_id]);
+	$stmt = $pdo->prepare("SELECT * FROM jta_events WHERE is_deleted = 0 ORDER BY `datetime_start` ASC");
+	$stmt->execute();
 	$events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 	$events = array_map( function($_event){
@@ -469,11 +469,11 @@ function get_event_by_id( $event_id = NULL ){
 	return $event;
 }
 
-function get_services( $pharma_id ){
+function get_services(){
 	global $pdo;
 
-	$stmt = $pdo->prepare("SELECT * FROM jta_services WHERE is_deleted = 0 AND pharma_id = :pharma_id ORDER BY title ASC");
-	$stmt->execute([':pharma_id' => $pharma_id]);
+	$stmt = $pdo->prepare("SELECT * FROM jta_services WHERE is_deleted = 0 ORDER BY title ASC");
+	$stmt->execute();
 	$services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 	$services = array_map( function($_service){
@@ -591,31 +591,23 @@ function normalize_user_profile_data($user_db) {
 function normalize_pharma_data( $pharma_db ){
 	if( ! $pharma_db ) return FALSE;
 
-	$wa_number = $pharma_db['wa_number'] ?? $pharma_db['phone_number'];
-        $img_bot     = get_pharma_img_src($pharma_db['id'], $pharma_db['img_bot'] ?? null, 'uploads/images/placeholder-assistente.jpg');
-        $avatar_file = $pharma_db['avatar'] ?? $pharma_db['img_avatar'] ?? null;
-        $logo_file   = $pharma_db['logo'] ?? null;
-
-        $img_avatar = get_pharma_img_src($pharma_db['id'], $avatar_file, 'uploads/images/placeholder-assistente.jpg', 'avatar');
-        $img_cover  = get_pharma_img_src($pharma_db['id'], $pharma_db['img_cover'] ?? null, 'uploads/images/placeholder-logo-farmacia.jpg');
-        $img_logo   = get_pharma_img_src($pharma_db['id'], $logo_file, 'uploads/images/placeholder-logo-farmacia.jpg', 'logo');
-
 	$pharma = [
 		'id'            => (int) $pharma_db['id'],
 		'name'          => $pharma_db['slug_name'],
 		'business_name' => $pharma_db['business_name'],
 		'email'         => $pharma_db['email'],
 		'phone_number'  => $pharma_db['phone_number'],
-		'wa_number'     => $wa_number,
+		'wa_number'     => $pharma_db['phone_number'],
 		'description'   => $pharma_db['description'],
 
 		// 'image_bot'    => site_url().'/assets/pharmacies/'.$pharma_db['id'].'/'.$pharma_db['img_bot'],
 		// 'image_avatar' => site_url().'/assets/pharmacies/'.$pharma_db['id'].'/'.$pharma_db['img_avatar'],
 		// 'image_cover'  => site_url().'/assets/pharmacies/'.$pharma_db['id'].'/'.$pharma_db['img_cover'],
-		'image_logo'   => $img_logo,
-		'image_bot'    => $img_bot,
-		'image_avatar' => $img_avatar,
-		'image_cover'  => $img_cover,
+		'image_logo'   => 'https://app.assistentefarmacia.it/panel/'.$pharma_db['logo'],
+		// 'image_bot'    => get_pharma_img_src($pharma_db['id'], $pharma_db['img_bot']),
+		'image_bot'    => 'https://assistentefarmacia.it/app-cliente-farmacia/img/Raffaella.jpg',
+		'image_avatar' => get_pharma_img_src($pharma_db['id'], $pharma_db['img_avatar']),
+		'image_cover'  => get_pharma_img_src($pharma_db['id'], $pharma_db['img_cover']),
 		'social_list'  => [],
 		'working_info' => [
 			'human' => format_schedule_human_friendly($pharma_db['working_info']),
@@ -1131,34 +1123,10 @@ function normalize_reminder_expiry_data( $reminder_db ){
 	return $reminder;
 }
 
-function get_pharma_img_src( $pharma_id = NULL, $filename = NULL, $placeholder = NULL, $type = NULL ){
-        $type = $type ? strtolower($type) : NULL;
+function get_pharma_img_src( $pharma_id = NULL, $filename = NULL ){
+	if( isset($pharma_id, $filename) ){
+		return rtrim(site_url(), '/').'/uploads/pharmacies/1/logo_farmacia_giovinazzi.png';
+	}
 
-        if (isset($filename) && filter_var($filename, FILTER_VALIDATE_URL)) {
-                return $filename;
-        }
-
-        if (!empty($filename)) {
-                $filename = ltrim($filename, '/');
-
-                if ($type === 'avatar') {
-                        return 'https://assistentefarmacia.it/app-cliente-farmacia/img/'.$filename;
-                }
-
-                if ($type === 'logo') {
-                        return 'https://app.assistentefarmacia.it/panel/uploads/pharmacies/logos/'.$filename;
-                }
-
-                if (!empty($pharma_id)) {
-                        return rtrim(site_url(), '/').'/uploads/pharmacies/'.$pharma_id.'/'.$filename;
-                }
-
-                return rtrim(site_url(), '/').'/'.ltrim($filename, '/');
-        }
-
-        if ($placeholder) {
-                return rtrim(site_url(), '/').'/'.ltrim($placeholder, '/');
-        }
-
-        return null;
+	return;
 }

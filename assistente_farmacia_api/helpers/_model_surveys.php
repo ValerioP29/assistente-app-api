@@ -619,100 +619,98 @@ class SurveysModel {
 
 				"cta" => NULL,
 			],
+			7 => [
+				"id"         => 6,
+				"title"      => "🎄 QUIZ DELLA SETTIMANA – FARMACIA GIOVINAZZI",
+				"subtitle"   => "Disturbi digestivi durante le feste: come ti comporti davvero?",
+				"summary"    => "Durante le feste non conta solo cosa mangiamo,\nma soprattutto come ci comportiamo prima e dopo i pasti.\n👉 Il farmacista è il tuo punto di riferimento\nper capire cosa fare, cosa evitare e quando intervenire.",
+				"created_at" => "2025-12-16 00:00:00",
+				"start_date" => "2025-12-15 00:00:00",
+				"end_date"   => "2025-12-22 23:59:59",
 
-		7 => [
-		"id"         => 6,
-		"title"      => "🎄 QUIZ DELLA SETTIMANA – FARMACIA GIOVINAZZI",
-		"subtitle"   => "Disturbi digestivi durante le feste: come ti comporti davvero?",
-		"summary"    => "Durante le feste non conta solo cosa mangiamo,\nma soprattutto come ci comportiamo prima e dopo i pasti.\n👉 Il farmacista è il tuo punto di riferimento\nper capire cosa fare, cosa evitare e quando intervenire.",
-		"created_at" => "2025-12-16 00:00:00",
-		"start_date" => "2025-12-15 00:00:00",
-		"end_date"   => "2025-12-22 23:59:59",
+				"questions" => [
+					[
+						"question" => "Dopo un pasto abbondante, cosa fai di solito?",
+						"answers" => [
+							["value" => "A", "label" => "Faccio una passeggiata o resto un po in movimento"],
+							["value" => "B", "label" => "Mi siedo subito e prendo una tisana"],
+							["value" => "C", "label" => "Mi sdraio sul divano o vado a letto"],
+							["value" => "D", "label" => "Prendo un caffè sperando di digerire"],
+						]
+					],
+					[
+						"question" => "Se senti lo stomaco pesante o gonfio, come reagisci?",
+						"answers" => [
+							["value" => "A", "label" => "Cerco di mangiare più leggero nel pasto successivo"],
+							["value" => "B", "label" => "Prendo qualcosa per aiutare la digestione"],
+							["value" => "C", "label" => "Uso un antiacido o un prodotto contro il reflusso"],
+							["value" => "D", "label" => "Prendo un gastroprotettore “per prevenire”"],
+						]
+					],
+					[
+						"question" => "Quando avverti bruciore o acidità, cosa fai?",
+						"answers" => [
+							["value" => "A", "label" => "Mangio qualcosa di secco ed evito cibi o bevande acide"],
+							["value" => "B", "label" => "Bevo qualcosa o cerco un rimedio naturale"],
+							["value" => "C", "label" => "Uso un prodotto specifico contro acidità e reflusso"],
+							["value" => "D", "label" => "Prendo farmaci senza chiedere consiglio"],
+						]
+					],
+					[
+						"question" => "Durante le feste, come gestisci i pasti abbondanti?",
+						"answers" => [
+							["value" => "A", "label" => "Cerco di ascoltare il mio corpo e fermarmi in tempo"],
+							["value" => "B", "label" => "Mangio velocemente e me ne accorgo dopo"],
+							["value" => "C", "label" => "Mangio tanto anche sapendo che poi starò male"],
+							["value" => "D", "label" => "Mangio poco per paura dei sintomi"],
+						]
+					],
+					[
+						"question" => "Se i disturbi digestivi si ripetono per più giorni, cosa fai?",
+						"answers" => [
+							["value" => "A", "label" => "Chiedo consiglio al farmacista o al medico"],
+							["value" => "B", "label" => "Modifico alimentazione e abitudini"],
+							["value" => "C", "label" => "Continuo a prendere prodotti da banco"],
+							["value" => "D", "label" => "Uso spesso antiacidi o simili"],
+						]
+					],
+				],
 
-		"questions" => [
-			[
-				"question" => "Dopo un pasto abbondante, cosa fai di solito?",
-				"answers" => [
-					["value" => "A", "label" => "Faccio una passeggiata o resto un po in movimento"],
-					["value" => "B", "label" => "Mi siedo subito e prendo una tisana"],
-					["value" => "C", "label" => "Mi sdraio sul divano o vado a letto"],
-					["value" => "D", "label" => "Prendo un caffè sperando di digerire"],
-				]
-			],
-			[
-				"question" => "Se senti lo stomaco pesante o gonfio, come reagisci?",
-				"answers" => [
-					["value" => "A", "label" => "Cerco di mangiare più leggero nel pasto successivo"],
-					["value" => "B", "label" => "Prendo qualcosa per aiutare la digestione"],
-					["value" => "C", "label" => "Uso un antiacido o un prodotto contro il reflusso"],
-					["value" => "D", "label" => "Prendo un gastroprotettore “per prevenire”"],
-				]
-			],
-			[
-				"question" => "Quando avverti bruciore o acidità, cosa fai?",
-				"answers" => [
-					["value" => "A", "label" => "Mangio qualcosa di secco ed evito cibi o bevande acide"],
-					["value" => "B", "label" => "Bevo qualcosa o cerco un rimedio naturale"],
-					["value" => "C", "label" => "Uso un prodotto specifico contro acidità e reflusso"],
-					["value" => "D", "label" => "Prendo farmaci senza chiedere consiglio"],
-				]
-			],
-			[
-				"question" => "Durante le feste, come gestisci i pasti abbondanti?",
-				"answers" => [
-					["value" => "A", "label" => "Cerco di ascoltare il mio corpo e fermarmi in tempo"],
-					["value" => "B", "label" => "Mangio velocemente e me ne accorgo dopo"],
-					["value" => "C", "label" => "Mangio tanto anche sapendo che poi starò male"],
-					["value" => "D", "label" => "Mangio poco per paura dei sintomi"],
-				]
-			],
-			[
-				"question" => "Se i disturbi digestivi si ripetono per più giorni, cosa fai?",
-				"answers" => [
-					["value" => "A", "label" => "Chiedo consiglio al farmacista o al medico"],
-					["value" => "B", "label" => "Modifico alimentazione e abitudini"],
-					["value" => "C", "label" => "Continuo a prendere prodotti da banco"],
-					["value" => "D", "label" => "Uso spesso antiacidi o simili"],
-				]
-			],
-		],
+				"products"     => NULL,
+				"products_ids" => [1163,7142,380,7143,697,7073,7103,7144,4837,6074,7145,467],
 
-		"products"     => NULL,
-		"products_ids" => [1163,7142,380,7143,697,7073,7103,7144,4837,6074,7145,467],
+				"profiles" => [
+					"A" => [
+						"title"  => "PROFILO A",
+						"text"   => "Consapevole, riesci a regolarti anche durante le feste <br> 👉 I tuoi disturbi i sono  lievi e legati ad eccessi occasionali",
+						"advice" => "Consigli\n\t•\tassaggia un po’ di tutto senza esagerare\n\t•\t fai movimento leggero dopo i pasti\n\t•\tusa rimedi solo se servono\n\nProdotti consigliati (al bisogno)\n\t1.\tEpakur Digestive – tisana – €11,50\nFavorisce la digestione in modo delicato\n\t2.\tGeffer granulato effervescente – €7,90\nUtile per senso di peso post-pasto\n\t3.\tBiochetasi Digestione Pocket – €12,50\nSupporto digestivo pratico e leggero",
+						"products" => [1163,7142,380],
+					],
 
-		"profiles" => [
-			"A" => [
-				"title"  => "PROFILO A",
-				"text"   => "Consapevole, riesci a regolarti anche durante le feste <br> 👉 I tuoi disturbi i sono  lievi e legati ad eccessi occasionali",
-				"advice" => "Consigli\n\t•\tassaggia un po’ di tutto senza esagerare\n\t•\t fai movimento leggero dopo i pasti\n\t•\tusa rimedi solo se servono\n\nProdotti consigliati (al bisogno)\n\t1.\tEpakur Digestive – tisana – €11,50\nFavorisce la digestione in modo delicato\n\t2.\tGeffer granulato effervescente – €7,90\nUtile per senso di peso post-pasto\n\t3.\tBiochetasi Digestione Pocket – €12,50\nSupporto digestivo pratico e leggero",
-				"products" => [1163,7142,380],
+					"B" => [
+						"title"  => "PROFILO B",
+						"text"   => "Buone intenzioni, ma digestione lenta e gonfiore <br> 👉 Ti muovi nella direzione giusta, ma gonfiore e fermentazione intestinale sono frequenti.",
+						"advice" => "Consigli\n\t•\tmangia più lentamente\n\t•\tlimita bevande gassate e lievitati\n\t•\tcammina dopo i pasti\n\nProdotti consigliati\n\t1.\tNo Coli Gonfiore – €14,90\nRiduce la formazione di gas intestinali\n\t2.\tColigas Fast – tisana – €11,50\nAllevia gonfiore e tensione addominale\n\t3.\tPiù Flora – fermenti lattici – €14,50\nRiequilibra l’intestino dopo eccessi alimentari",
+						"products" => [7143,697,7073],
+					],
+
+					"C" => [
+						"title"  => "PROFILO C",
+						"text"   => "Comportamenti a rischio reflusso <br> 👉 Alcune abitudini favoriscono acidità e reflusso.",
+						"advice" => "Consigli\n\t•\tevita di sdraiarti dopo mangiato\n\t•\tcena almeno 2–3 ore prima di dormire\n\t•\tlimita alcol, caffè, cioccolato\n\nProdotti consigliati\n\t1.\tNeoBianacid – €15,90\nProtegge e lenisce la mucosa gastrica\n\t2.\tXanacid stick – €12,90\nAzione barriera rapida, pratico fuori casa\n\t3.\tGaviscon Bruciore e Indigestione – €15,95\nUtile soprattutto la sera\n\n⚠️ I gastroprotettori non sono indicati nei disturbi occasionali.",
+						"products" => [7103,7144,4837],
+					],
+
+					"D" => [
+						"title"  => "PROFILO D",
+						"text"   => "Attenzione: gestione scorretta dei disturbi <br> 👉 I sintomi sono persistenti o gestiti in modo non corretto.",
+						"advice" => "Consigli\n\t•\tevita l’automedicazione\n\t•\tnon usare gastroprotettori “preventivi”\n\t•\tconfrontati con un professionista\n\nProdotti eventualmente utilizzabili solo come supporto temporaneo\n\t1.\tReflugea Forte – €36,60\nProtezione intensa della mucosa\n\t2.\tMaalox RefluRapid – €13,90\nSollievo rapido dal bruciore\n\t3.\tBuscopan 10 mg – €16,90\nIn caso di dolore o spasmo",
+						"products" => [6074,7145,467],
+					],
+				],
+
+				"cta" => NULL,
 			],
-
-			"B" => [
-				"title"  => "PROFILO B",
-				"text"   => "Buone intenzioni, ma digestione lenta e gonfiore <br> 👉 Ti muovi nella direzione giusta, ma gonfiore e fermentazione intestinale sono frequenti.",
-				"advice" => "Consigli\n\t•\tmangia più lentamente\n\t•\tlimita bevande gassate e lievitati\n\t•\tcammina dopo i pasti\n\nProdotti consigliati\n\t1.\tNo Coli Gonfiore – €14,90\nRiduce la formazione di gas intestinali\n\t2.\tColigas Fast – tisana – €11,50\nAllevia gonfiore e tensione addominale\n\t3.\tPiù Flora – fermenti lattici – €14,50\nRiequilibra l’intestino dopo eccessi alimentari",
-				"products" => [7143,697,7073],
-			],
-
-			"C" => [
-				"title"  => "PROFILO C",
-				"text"   => "Comportamenti a rischio reflusso <br> 👉 Alcune abitudini favoriscono acidità e reflusso.",
-				"advice" => "Consigli\n\t•\tevita di sdraiarti dopo mangiato\n\t•\tcena almeno 2–3 ore prima di dormire\n\t•\tlimita alcol, caffè, cioccolato\n\nProdotti consigliati\n\t1.\tNeoBianacid – €15,90\nProtegge e lenisce la mucosa gastrica\n\t2.\tXanacid stick – €12,90\nAzione barriera rapida, pratico fuori casa\n\t3.\tGaviscon Bruciore e Indigestione – €15,95\nUtile soprattutto la sera\n\n⚠️ I gastroprotettori non sono indicati nei disturbi occasionali.",
-				"products" => [7103,7144,4837],
-			],
-
-			"D" => [
-				"title"  => "PROFILO D",
-				"text"   => "Attenzione: gestione scorretta dei disturbi <br> 👉 I sintomi sono persistenti o gestiti in modo non corretto.",
-				"advice" => "Consigli\n\t•\tevita l’automedicazione\n\t•\tnon usare gastroprotettori “preventivi”\n\t•\tconfrontati con un professionista\n\nProdotti eventualmente utilizzabili solo come supporto temporaneo\n\t1.\tReflugea Forte – €36,60\nProtezione intensa della mucosa\n\t2.\tMaalox RefluRapid – €13,90\nSollievo rapido dal bruciore\n\t3.\tBuscopan 10 mg – €16,90\nIn caso di dolore o spasmo",
-				"products" => [6074,7145,467],
-			],
-		],
-
-		"cta" => NULL,
-		],
-
 		);
 	}
 
@@ -720,12 +718,9 @@ class SurveysModel {
 	 * Cerca un sondaggio per ID
 	 * @return array|false
 	 */
-	public static function findById($id, ?int $pharma_id = null) {
+	public static function findById($id) {
 		$surveys = self::data();
 		$survey = $surveys[$id] ?? FALSE;
-		if( $survey && $pharma_id && isset($survey['pharma_id']) && $survey['pharma_id'] != $pharma_id ){
-			return FALSE;
-		}
 		return $survey;
 	}
 
@@ -733,13 +728,10 @@ class SurveysModel {
 	 * Cerca un sondaggio per giorno
 	 * @return array|false
 	 */
-	public static function findByDate($date, ?int $pharma_id = null) {
+	public static function findByDate($date) {
 		$surveys = self::data();
 		$monday = get_week_start_date($date);
-		$survey = array_filter($surveys, function($_survey) use ($monday, $pharma_id) {
-			if( $pharma_id && isset($_survey['pharma_id']) && $_survey['pharma_id'] != $pharma_id ){
-				return FALSE;
-			}
+		$survey = array_filter($surveys, function($_survey) use ($monday) {
 			return $_survey['start_date'] ? (date('Y-m-d', strtotime($_survey['start_date'])) == $monday) : FALSE;
 		});
 		$survey = array_values($survey);
@@ -751,12 +743,9 @@ class SurveysModel {
 	 * Cerca i sondaggi "aperti" (basandosi su data inizio e data fine)
 	 * @return array|false
 	 */
-	public static function getAllOpen($date_time, ?int $pharma_id = null) {
+	public static function getAllOpen($date_time) {
 		$surveys = self::data();
-		$survey = array_filter($surveys, function($_survey) use ($date_time, $pharma_id) {
-			if( $pharma_id && isset($_survey['pharma_id']) && $_survey['pharma_id'] != $pharma_id ){
-				return FALSE;
-			}
+		$survey = array_filter($surveys, function($_survey) use ($date_time) {
 			if( isset($_survey['start_date']) && isset($_survey['end_date']) ){
 				return $_survey['start_date'] <= $date_time && $date_time <= $_survey['end_date'];
 			}elseif( isset($_survey['start_date']) ){
@@ -818,3 +807,4 @@ class SurveysModel {
 function normalize_survey_data(array $survey) {
 	return SurveysModel::normalize($survey);
 }
+

@@ -161,6 +161,21 @@ class CommModel {
 		if( $comm['status'] < 0 OR $comm['status'] > 0 ) return FALSE;
 		if( $schedule_date && $schedule_date > date('Y-m-d H:i:s') ) return FALSE;
 
+		$user = get_user_by_id($comm['user_id']);
+		if( ! $user ){
+			self::update($comm['id'], ['status' => -1, 'response' => ['error' => 'Utente non trovato', 'details' => 'User not found' ]]);
+			return FALSE;
+		}elseif( $user['accept_marketing'] != 1 ){
+			self::update($comm['id'], ['status' => -1, 'response' => ['error' => 'Comunicazioni marketing non autorizzate', 'details' => 'No marketing consent' ]]);
+			return FALSE;
+		}elseif( $user['status'] != 'active' ){
+			self::update($comm['id'], ['status' => -1, 'response' => ['error' => 'Accoun non attivo', 'details' => 'Account not active' ]]);
+			return FALSE;
+		}elseif( $user['is_deleted '] == 1 ){
+			self::update($comm['id'], ['status' => -1, 'response' => ['error' => 'Account cancellato', 'details' => 'Account deleted' ]]);
+			return FALSE;
+		}
+
 		if( $comm['type'] == 'wa' ){
 			if( $delay_ms > 0 ) usleep( $delay_ms * 1000 );
 			$response = wa_send($message, $to, $comm['pharma_id']);

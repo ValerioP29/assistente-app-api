@@ -5,7 +5,7 @@ $decoded = protectFileWithJWT();
 
 $user_id = $decoded->sub;
 $user = get_user_by_id($user_id);
-$pharma = getMyPharma();
+$pharma = get_fav_pharma_by_user_id( $user_id );
 
 if( ! $user ){
 	echo json_encode([

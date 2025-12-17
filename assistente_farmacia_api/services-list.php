@@ -16,8 +16,7 @@ if( ! $user ){
 
 //------------------------------------------------
 
-$pharma = getMyPharma();
-$services = get_services((int) $pharma['id']);
+$services = get_services();
 
 echo json_encode([
 	'code'   => 200,

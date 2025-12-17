@@ -41,16 +41,7 @@ if (!in_array($profile, $valid_profiles)) {
 }
 
 $pharma = getMyPharma();
-$pharma_id = isset($pharma['id']) ? (int) $pharma['id'] : null;
-if( ! $pharma_id ){
-	echo json_encode([
-		'code'    => 400,
-		'status'  => FALSE,
-		'error'   => 'Bad Request',
-		'message' => 'Farmacia non valida.',
-	]);
-	exit();
-}
+$pharma_id = (int) $pharma['id'];
 $user_id   = (int) $user['id'];
 
 global $pdo; 
