@@ -204,26 +204,26 @@ class PillsModel {
 		global $pdo;
 
 		try {
-			if( $not_future ){
-				$stmt = $pdo->prepare("
-					SELECT * FROM jta_daily_pills 
-					WHERE deleted_at IS NULL 
-					AND pharma_id = :pharma_id
-					AND day <= CURDATE()
-					AND is_done = 1
-					ORDER BY day DESC 
-					LIMIT :limit
-				");
-			}else{
-				$stmt = $pdo->prepare("
-					SELECT * FROM jta_daily_pills 
-					WHERE deleted_at IS NULL 
-					AND pharma_id = :pharma_id
-					AND is_done = 1
-					ORDER BY day DESC 
-					LIMIT :limit
-				");
-			}
+                        if( $not_future ){
+                                $stmt = $pdo->prepare("
+                                        SELECT * FROM jta_daily_pills
+                                        WHERE deleted_at IS NULL
+                                        AND (pharma_id = :pharma_id OR (:pharma_id = 1 AND pharma_id IS NULL))
+                                        AND day <= CURDATE()
+                                        AND is_done = 1
+                                        ORDER BY day DESC
+                                        LIMIT :limit
+                                ");
+                        }else{
+                                $stmt = $pdo->prepare("
+                                        SELECT * FROM jta_daily_pills
+                                        WHERE deleted_at IS NULL
+                                        AND (pharma_id = :pharma_id OR (:pharma_id = 1 AND pharma_id IS NULL))
+                                        AND is_done = 1
+                                        ORDER BY day DESC
+                                        LIMIT :limit
+                                ");
+                        }
 
 			$stmt->bindValue(':pharma_id', $pharma_id, PDO::PARAM_INT);
 			$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);

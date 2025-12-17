@@ -1,13 +1,16 @@
 <?php
 require_once('_api_bootstrap.php');
 setHeadersAPI();
+ob_start();
 $decoded = protectFileWithJWT();
 
 $user = get_my_data();
 if( ! $user ){
-	echo json_encode([
-		'code'    => 401,
-		'status'  => FALSE,
+
+        if( ob_get_length() ) ob_clean();
+        echo json_encode([
+                'code'    => 401,
+                'status'  => FALSE,
 		'error'   => 'Invalid or expired token',
 		'message' => 'Accesso negato',
 	]);
@@ -20,9 +23,11 @@ $now   = new DateTime();
 $start = new DateTime('00:00');
 $end   = new DateTime('00:15');
 if ($now >= $start && $now <= $end) {
-	echo json_encode([
-		'code'    => 404,
-		'status'  => FALSE,
+
+        if( ob_get_length() ) ob_clean();
+        echo json_encode([
+                'code'    => 404,
+                'status'  => FALSE,
 		'error'   => 'Midnight Challenge Maintenance Mode',
 		'message' => 'La sfida della settimana è in pausa, torna tra 15min.',
 	]);
@@ -33,9 +38,11 @@ if ($now >= $start && $now <= $end) {
 
 $pharma = getMyPharma();
 if( ! $pharma ){
-	echo json_encode([
-		'code'    => 400,
-		'status'  => FALSE,
+
+        if( ob_get_length() ) ob_clean();
+        echo json_encode([
+                'code'    => 400,
+                'status'  => FALSE,
 		'error'   => 'Bad Request',
 		'message' => 'Farmacia non valida.',
 	]);
@@ -44,9 +51,11 @@ if( ! $pharma ){
 
 $challenge = ChallengesModel::getCurrentWeek((int) $pharma['id']);
 if( ! $challenge ){
-	echo json_encode([
-		'code'    => 404,
-		'status'  => FALSE,
+
+        if( ob_get_length() ) ob_clean();
+        echo json_encode([
+                'code'    => 404,
+                'status'  => FALSE,
 		'error'   => 'Not Found',
 		'message' => 'La nuova sfida non è ancora pronta.',
 	]);
@@ -91,9 +100,11 @@ function get_week_progress_array(): array {
 $challenge = normalize_challenge_data($challenge);
 $user_progress = ChallengeProgressModel::normalizeProgress($user_progress);
 
+if( ob_get_length() ) ob_clean();
+
 echo json_encode([
-	'code'    => 200,
-	'status'  => TRUE,
+        'code'    => 200,
+        'status'  => TRUE,
 	'message' => NULL,
 	'data'    => array_merge($challenge, $user_progress),
 ]);
