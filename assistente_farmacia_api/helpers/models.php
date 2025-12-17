@@ -592,10 +592,13 @@ function normalize_pharma_data( $pharma_db ){
 	if( ! $pharma_db ) return FALSE;
 
 	$wa_number = $pharma_db['wa_number'] ?? $pharma_db['phone_number'];
-	$img_bot    = get_pharma_img_src($pharma_db['id'], $pharma_db['img_bot'] ?? null, 'uploads/images/placeholder-assistente.jpg');
-	$img_avatar = get_pharma_img_src($pharma_db['id'], $pharma_db['img_avatar'] ?? null, 'uploads/images/placeholder-assistente.jpg', 'avatar');
-	$img_cover  = get_pharma_img_src($pharma_db['id'], $pharma_db['img_cover'] ?? null, 'uploads/images/placeholder-logo-farmacia.jpg');
-	$img_logo   = get_pharma_img_src($pharma_db['id'], $pharma_db['logo'] ?? null, 'uploads/images/placeholder-logo-farmacia.jpg', 'logo');
+        $img_bot     = get_pharma_img_src($pharma_db['id'], $pharma_db['img_bot'] ?? null, 'uploads/images/placeholder-assistente.jpg');
+        $avatar_file = $pharma_db['avatar'] ?? $pharma_db['img_avatar'] ?? null;
+        $logo_file   = $pharma_db['logo'] ?? null;
+
+        $img_avatar = get_pharma_img_src($pharma_db['id'], $avatar_file, 'uploads/images/placeholder-assistente.jpg', 'avatar');
+        $img_cover  = get_pharma_img_src($pharma_db['id'], $pharma_db['img_cover'] ?? null, 'uploads/images/placeholder-logo-farmacia.jpg');
+        $img_logo   = get_pharma_img_src($pharma_db['id'], $logo_file, 'uploads/images/placeholder-logo-farmacia.jpg', 'logo');
 
 	$pharma = [
 		'id'            => (int) $pharma_db['id'],
@@ -1129,37 +1132,33 @@ function normalize_reminder_expiry_data( $reminder_db ){
 }
 
 function get_pharma_img_src( $pharma_id = NULL, $filename = NULL, $placeholder = NULL, $type = NULL ){
-	$type = $type ? strtolower($type) : NULL;
+        $type = $type ? strtolower($type) : NULL;
 
-	$pharma_assets = [
-		1 => [
-			'logo'   => 'assets/images/assistente-farmacia-logo.png',
-			'avatar' => 'assets/images/assistente_ott25_baloon_raffaella.png',
-		],
-		2 => [
-			'logo'   => 'assets/images/farmacia_ai_gemelli_logo___payoff.png',
-			'avatar' => 'assets/images/avatar_bozza02.png',
-		],
-	];
+        if (isset($filename) && filter_var($filename, FILTER_VALIDATE_URL)) {
+                return $filename;
+        }
 
-	if ($pharma_id && $type && isset($pharma_assets[$pharma_id][$type])) {
-		return rtrim(site_url(), '/').'/'.ltrim($pharma_assets[$pharma_id][$type], '/');
-	}
+        if (!empty($filename)) {
+                $filename = ltrim($filename, '/');
 
-	if( empty($pharma_id) || empty($filename) ){
-		if (isset($filename) && filter_var($filename, FILTER_VALIDATE_URL)) {
-			return $filename;
-		}
-		if ($placeholder) {
-			return rtrim(site_url(), '/').'/'.ltrim($placeholder, '/');
-		}
-		return isset($filename) ? rtrim(site_url(), '/').'/'.ltrim($filename, '/') : null;
-	}
+                if ($type === 'avatar') {
+                        return 'https://assistentefarmacia.it/app-cliente-farmacia/img/'.$filename;
+                }
 
-	if (filter_var($filename, FILTER_VALIDATE_URL)) {
-		return $filename;
-	}
+                if ($type === 'logo') {
+                        return 'https://app.assistentefarmacia.it/panel/uploads/pharmacies/logos/'.$filename;
+                }
 
-	$filename = ltrim($filename, '/');
-	return rtrim(site_url(), '/').'/uploads/pharmacies/'.$pharma_id.'/'.$filename;
+                if (!empty($pharma_id)) {
+                        return rtrim(site_url(), '/').'/uploads/pharmacies/'.$pharma_id.'/'.$filename;
+                }
+
+                return rtrim(site_url(), '/').'/'.ltrim($filename, '/');
+        }
+
+        if ($placeholder) {
+                return rtrim(site_url(), '/').'/'.ltrim($placeholder, '/');
+        }
+
+        return null;
 }
