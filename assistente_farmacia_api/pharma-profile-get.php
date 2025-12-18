@@ -52,6 +52,11 @@ include_once($profile_file);
 $pharma_data['profile'] = ob_get_clean();
 $pharma_data['turni'] = [];
 
+$pharma_data['cover_image_url'] = $pharma_data['image_cover'] ?? null;
+if( empty($pharma_data['cover_image_url']) ){
+	$pharma_data['cover_image_url'] = rtrim(site_url(), '/').'/uploads/images/placeholder-assistente.jpg';
+}
+
 if( $pharma_slug == 1 ){
 	$pharma_data['turni'] = [ '2025-09-03', '2025-09-13', '2025-09-23', '2025-10-03', '2025-10-13', '2025-10-23', '2025-11-02', '2025-11-12', '2025-11-22', '2025-12-02', '2025-12-12', '2025-12-22' ];
 }
