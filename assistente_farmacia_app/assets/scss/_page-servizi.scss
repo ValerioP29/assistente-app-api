@@ -147,6 +147,55 @@ body.page-services {
 			display: inline-block;
 		}
 	}
+
+	.services-list.macro-services {
+		.macro-accordion__label {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			width: 100%;
+		}
+
+		.macro-panel {
+			background-color: #fff;
+		}
+
+		.service-items {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+		}
+
+		.service-item-card {
+			background-color: #fff;
+			border: 1px solid #ececec;
+			border-radius: 10px;
+			padding: 12px;
+		}
+
+		.service-item__header {
+			font-weight: 600;
+			margin-bottom: 6px;
+		}
+
+		.service-item__actions {
+			display: flex;
+			gap: 8px;
+			align-items: center;
+			flex-wrap: wrap;
+
+			.booking-form {
+				margin: 0;
+				flex: 1 1 200px;
+				padding-left: 12px;
+				text-align: left;
+			}
+
+			.btn {
+				white-space: nowrap;
+			}
+		}
+	}
 }
 
 .inline-message {

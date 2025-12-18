@@ -2,60 +2,164 @@ document.addEventListener('appLoaded', () => {
 	const container = document.getElementById('panel');
 	if (!container) return;
 
-	appFetchWithToken(AppURLs.api.getServices())
+	const pharmaId = Number(dataStore?.pharma?.id);
+	const isMacroLayout = pharmaId === 3;
+	const servicesUrl = (() => {
+		const base = AppURLs.api.getServices();
+		if (!pharmaId) return base;
+		const sep = base.includes('?') ? '&' : '?';
+		return `${base}${sep}pharma_id=${pharmaId}`;
+	})();
+
+	appFetchWithToken(servicesUrl)
 		.then(({status, data: servizi}) => {
 			if (!status) throw new Error('Errore API nel caricamento servizi');
 
 			container.innerHTML = '';
+			container.classList.toggle('macro-services', isMacroLayout);
 
-			servizi.forEach((servizio) => {
-				const btn = document.createElement('button');
-				btn.classList.add('accordion');
-				btn.dataset.id = servizio?.id ?? 'servizio-generico';
-				btn.dataset.item = 'service';
-				btn.innerHTML = `
-					<i class="${servizio.iconClass ?? ''}"></i>
-					<span class="title">${servizio.title ?? ''}</span>
-				`;
-
-				const div = document.createElement('div');
-				div.classList.add('panel');
-				div.style.display = 'none';
-				div.innerHTML = `
-					<p>${nl2br(servizio.description ?? '')}</p>
-					<div class="d-flex justify-content-end btn-ai-wrapper">
-						<button class="btn btn-ai btn-ai--service" aria-label="Chiedi all'AI" data-nome="${escapeAttr(servizio.title)}"
-							data-id="${servizio.id}">
-							<img src="./assets/images/assistente_ott25_baloon_raffaella.png" width="32" height="32" alt="" />
-						</button>
-					</div>
-					<div class="booking-form-wrapper">
-						<label for="datetime-${servizio.id}" class="text-center">Seleziona la data:</label>
-						<i class="fas fa-calendar-alt calendar-icon"></i>
-						<input id="datetime-${servizio.id}" type="datetime-local" name="pickup" class="booking-form form-control" required />
-					</div>
-					<p class="small text-muted mt-2">
-						Le date e gli orari scelti devono rispettare l'orario di apertura della farmacia. 
-						<a role="button" class="see-hours">Vedi orari</a>
-					</p>
-					<a href="#" class="cta">Prenota ora</a>
-					<p class="small text-muted mt-2 mb-0">** Le richieste inviate dopo le ore 13:00 potrebbero essere gestite il giorno successivo.</p>
-				`;
-
-				btn.addEventListener('click', function () {
-					this.classList.toggle('active');
-					const panel = this.nextElementSibling;
-					panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-				});
-
-				// Append
-				container.appendChild(btn);
-				container.appendChild(div);
-			});
+			if (isMacroLayout) {
+				renderMacroServices(servizi, container);
+			} else {
+				renderLegacyServices(servizi, container);
+			}
 
 			document.dispatchEvent(new CustomEvent('servicesLoaded'));
 		})
 		.catch((err) => handleError(err, 'Errore nel caricamento dei servizi'));
+
+	function renderLegacyServices(servizi, target) {
+		servizi.forEach((servizio) => {
+			const btn = document.createElement('button');
+			btn.classList.add('accordion');
+			btn.dataset.id = servizio?.id ?? 'servizio-generico';
+			btn.dataset.item = 'service';
+			btn.innerHTML = `
+				<i class="${servizio.iconClass ?? ''}"></i>
+				<span class="title">${servizio.title ?? ''}</span>
+			`;
+
+			const div = document.createElement('div');
+			div.classList.add('panel');
+			div.style.display = 'none';
+			div.innerHTML = `
+				<p>${nl2br(servizio.description ?? '')}</p>
+				<div class="d-flex justify-content-end btn-ai-wrapper">
+					<button class="btn btn-ai btn-ai--service" aria-label="Chiedi all'AI" data-nome="${escapeAttr(servizio.title)}"
+						data-id="${servizio.id}">
+						<img src="./assets/images/assistente_ott25_baloon_raffaella.png" width="32" height="32" alt="" />
+					</button>
+				</div>
+				<div class="booking-form-wrapper">
+					<label for="datetime-${servizio.id}" class="text-center">Seleziona la data:</label>
+					<i class="fas fa-calendar-alt calendar-icon"></i>
+					<input id="datetime-${servizio.id}" type="datetime-local" name="pickup" class="booking-form form-control" required />
+				</div>
+				<p class="small text-muted mt-2">
+					Le date e gli orari scelti devono rispettare l'orario di apertura della farmacia. 
+					<a role="button" class="see-hours">Vedi orari</a>
+				</p>
+				<a href="#" class="cta">Prenota ora</a>
+				<p class="small text-muted mt-2 mb-0">** Le richieste inviate dopo le ore 13:00 potrebbero essere gestite il giorno successivo.</p>
+			`;
+
+			btn.addEventListener('click', function () {
+				this.classList.toggle('active');
+				const panel = this.nextElementSibling;
+				panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+			});
+
+			target.appendChild(btn);
+			target.appendChild(div);
+		});
+	}
+
+	function renderMacroServices(servizi, target) {
+		if (!Array.isArray(servizi) || servizi.length === 0) return;
+
+		servizi.forEach((servizio) => {
+			const btn = document.createElement('button');
+			btn.classList.add('accordion', 'macro-accordion');
+			btn.dataset.id = servizio?.id ?? 'servizio-generico';
+			btn.dataset.item = 'service';
+
+			const iconClass = servizio.iconClass ? escapeAttr(servizio.iconClass) : 'fas fa-briefcase-medical';
+			btn.innerHTML = `
+				<span class="macro-accordion__label">
+					<i class="${iconClass}"></i>
+					<span class="title">${escapeHtml(servizio.title ?? '')}</span>
+				</span>
+			`;
+
+			const div = document.createElement('div');
+			div.classList.add('panel', 'macro-panel');
+			div.style.display = 'none';
+
+			const servicesList = document.createElement('div');
+			servicesList.classList.add('service-items');
+
+			const innerServices = (servizio.description || '')
+				.split('\n')
+				.map((line) => line.trim())
+				.filter((line) => line.length > 0);
+
+			if (innerServices.length === 0) {
+				const empty = document.createElement('p');
+				empty.classList.add('text-muted', 'mb-0');
+				empty.textContent = 'Servizi non disponibili';
+				servicesList.appendChild(empty);
+			}
+
+			innerServices.forEach((serviceName, idx) => {
+				const card = document.createElement('div');
+				card.classList.add('service-item-card');
+				card.dataset.serviceName = serviceName;
+
+				const header = document.createElement('div');
+				header.classList.add('service-item__header');
+				header.textContent = serviceName;
+				card.appendChild(header);
+
+				const actions = document.createElement('div');
+				actions.classList.add('service-item__actions');
+
+				const input = document.createElement('input');
+				input.type = 'datetime-local';
+				input.name = 'pickup';
+				input.required = true;
+				input.id = `datetime-${servizio.id}-${idx}`;
+				input.classList.add('booking-form', 'form-control', 'booking-form--inline');
+
+				const bookBtn = document.createElement('button');
+				bookBtn.type = 'button';
+				bookBtn.classList.add('btn', 'btn-primary', 'macro-service-book');
+				bookBtn.textContent = 'Prenota ora';
+
+				actions.appendChild(input);
+				actions.appendChild(bookBtn);
+				card.appendChild(actions);
+
+				servicesList.appendChild(card);
+			});
+
+			const reminder = document.createElement('p');
+			reminder.classList.add('small', 'text-muted', 'mt-2', 'mb-0');
+			reminder.innerHTML =
+				"Le date e gli orari scelti devono rispettare l'orario di apertura della farmacia. <a role=\"button\" class=\"see-hours\">Vedi orari</a>";
+
+			div.appendChild(servicesList);
+			div.appendChild(reminder);
+
+			btn.addEventListener('click', function () {
+				this.classList.toggle('active');
+				const panel = this.nextElementSibling;
+				panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+			});
+
+			target.appendChild(btn);
+			target.appendChild(div);
+		});
+	}
 
 	function getServiceButtonFromPanel(panel) {
 		if (!panel) return null;
@@ -96,8 +200,6 @@ document.addEventListener('appLoaded', () => {
 			}
 
 			const btn = getServiceButtonFromPanel(panel);
-			const service = btn?.querySelector('.title')?.textContent.trim() ?? 'Servizio';
-
 			try {
 				const id = btn?.dataset?.id ?? '';
 				const success = await prepareAndSendBooking({
@@ -109,6 +211,49 @@ document.addEventListener('appLoaded', () => {
 				if (success) {
 					input.value = '';
 					showToast(success.message, 'warning');
+				}
+			} catch (error) {
+				handleError(error, 'Errore di rete. Riprova più tardi.');
+			}
+			return;
+		}
+
+		const macroBtn = e.target.closest('.macro-service-book');
+		if (macroBtn) {
+			e.preventDefault();
+			const card = macroBtn.closest('.service-item-card');
+			const panel = macroBtn.closest('.panel');
+			const input = card?.querySelector("input[type='datetime-local']");
+			const datetime = input?.value ?? '';
+
+			if (!datetime) {
+				showToast('Inserisci data e orario prima di prenotare', 'warning');
+				return;
+			}
+
+			if (new Date(datetime) < new Date()) {
+				showToast('Seleziona una data futura valida', 'warning');
+				return;
+			}
+
+			const categoryBtn = getServiceButtonFromPanel(panel);
+			const categoryTitle = categoryBtn?.querySelector('.title')?.textContent.trim() ?? 'Servizio';
+			const serviceName = card?.dataset?.serviceName ?? '';
+			const message = [categoryTitle, serviceName].filter(Boolean).join(' - ');
+
+			try {
+				const id = categoryBtn?.dataset?.id ?? '';
+				const success = await prepareAndSendBooking({
+					id,
+					type: 'service',
+					datetime,
+					message,
+				});
+
+				if (success) {
+					input.value = '';
+					const toastType = success.status === false ? 'warning' : 'success';
+					if (success.message) showToast(success.message, toastType);
 				}
 			} catch (error) {
 				handleError(error, 'Errore di rete. Riprova più tardi.');
@@ -177,7 +322,7 @@ function showServiceByUrl() {
 	if (params.has('id')) {
 		const serviceId = params.get('id');
 		console.log(serviceId);
-		const elService = document.querySelector('[data-item="service"][data-id="'+serviceId+'"]')
+		const elService = document.querySelector('[data-item="service"][data-id="'+serviceId+'"]');
 		if( ! elService ) return;
 		elService.click();
 
