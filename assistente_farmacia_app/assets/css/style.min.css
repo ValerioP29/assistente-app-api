@@ -1278,6 +1278,45 @@ body.page-services .custom_request__wrapper .cta-submit {
   cursor: pointer;
   display: inline-block;
 }
+body.page-services .services-list.macro-services .macro-accordion__label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+body.page-services .services-list.macro-services .macro-panel {
+  background-color: #fff;
+}
+body.page-services .services-list.macro-services .service-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+body.page-services .services-list.macro-services .service-item-card {
+  background-color: #fff;
+  border: 1px solid #ececec;
+  border-radius: 10px;
+  padding: 12px;
+}
+body.page-services .services-list.macro-services .service-item__header {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+body.page-services .services-list.macro-services .service-item__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+body.page-services .services-list.macro-services .service-item__actions .booking-form {
+  margin: 0;
+  flex: 1 1 200px;
+  padding-left: 12px;
+  text-align: left;
+}
+body.page-services .services-list.macro-services .service-item__actions .btn {
+  white-space: nowrap;
+}
 
 .inline-message {
   margin-top: 8px;
