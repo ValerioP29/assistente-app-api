@@ -3028,6 +3028,19 @@ body.page-pharmacy .panel th {
 body.page-pharmacy .panel td {
   padding: 8px;
 }
+body.page-pharmacy .pharma-cover {
+  border-radius: 16px;
+  overflow: hidden;
+  margin: 12px 0 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+body.page-pharmacy .pharma-cover__img {
+  display: block;
+  width: 100%;
+  height: 160px;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
 body.page-pharmacy .cover-image {
   width: 100%;
   height: auto;
