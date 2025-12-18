@@ -94,6 +94,15 @@ document.addEventListener('appLoaded', function () {
 		if( ! main ) return;
 		main.innerHTML = pharmaData.profile;
 
+		const coverUrl = pharmaData.cover_image_url;
+		if (coverUrl) {
+			const content = main.querySelector('app-card .content') || main;
+			const cover = document.createElement('div');
+			cover.className = 'pharma-cover';
+			cover.innerHTML = `<img src="${coverUrl}" alt="Copertina farmacia" class="pharma-cover__img">`;
+			content.prepend(cover);
+		}
+
 		initAccordion();
 		renderTurniCalendar(pharmaData.turni);
 	}
