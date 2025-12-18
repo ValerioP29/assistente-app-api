@@ -16,6 +16,17 @@ if( ! $user ){
 
 //------------------------------------------------
 
+$pharma = getMyPharma();
+if( ! $pharma ){
+	echo json_encode([
+		'code'    => 400,
+		'status'  => FALSE,
+		'error'   => 'Bad Request',
+		'message' => 'Farmacia non valida.',
+	]);
+	exit();
+}
+
 $now   = new DateTime();
 $start = new DateTime('00:00');
 $end   = new DateTime('00:15');
@@ -33,8 +44,7 @@ if ($now >= $start && $now <= $end) {
 
 // $input = json_decode(file_get_contents("php://input"), TRUE);
 
-$pharma = getMyPharma();
-$quiz = QuizzesModel::getLastAvailable();
+$quiz = QuizzesModel::getLastAvailable((int) $pharma['id']);
 $points = $quiz? $quiz['points'] : 0;
 
 $can_give_points = ! UserPointsModel::hasEntryForDate($user['id'], $pharma['id'], 'quiz_daily');

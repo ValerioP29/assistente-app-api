@@ -4,27 +4,28 @@
 
 	require_once('../_api_bootstrap.php');
 	$all_categories = get_profiling_categories();
+	$pharma_id = isset($_GET['pharma_id']) && is_numeric($_GET['pharma_id']) ? (int) $_GET['pharma_id'] : 1;
 
 	if( isset($_GET['date']) && is_valid_date($_GET['date']) ){
-		PillsModel::generateEmptyPillsByDate($_GET['date']);
+		PillsModel::generateEmptyPillsByDate($_GET['date'], $pharma_id);
 	}
 
 	if( isset($_GET['tomorrow']) ){
 		$today_date = new DateTime();
 		$today_date->modify('+1 day');
 		$tomorrow_date = $today_date->format('Y-m-d');
-		PillsModel::generateEmptyPillsByDate($tomorrow_date);
+		PillsModel::generateEmptyPillsByDate($tomorrow_date, $pharma_id);
 		exit;
 	}
 
 	if( isset($_GET['magic']) ){
-		PillsModel::populateAnEmptyPill();
-		echo 'Pillole ancora da generare: '.PillsModel::countEmptyPills();
+		PillsModel::populateAnEmptyPill($pharma_id);
+		echo 'Pillole ancora da generare: '.PillsModel::countEmptyPills($pharma_id);
 		exit;
 	}
 
 	$default_date = '';
-	$last_pill = PillsModel::getLatest(1, FALSE);
+	$last_pill = PillsModel::getLatest(1, $pharma_id, FALSE);
 	if( is_array($last_pill) && ! empty($last_pill) ){
 		$default_date = new DateTime($last_pill[0]['day']);
 		$default_date->modify('+1 day');
@@ -43,7 +44,7 @@
 		} else {
 			try{
 				$category = get_random_profiling_category();
-				$pill_id = PillsModel::insertFromAI( $date, $category );
+				$pill_id = PillsModel::insertFromAI( $date, $category, $pharma_id );
 
 				if (! $pill_id) {
 					$error = "Errore nella generazione della pillola.";

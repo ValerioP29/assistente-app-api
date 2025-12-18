@@ -60,6 +60,7 @@
 					</button>
 				</div>
 
+				<div class="show-on-pharma--1 d-none">
 				<app-card>
 					<div class="slider-promo-title">In evidenza</div>
 					<div class="slider-promo-container">
@@ -85,6 +86,7 @@
 						<div class="slider-dots"></div>
 					</div>
 				</app-card>
+				</div>
 
 				<app-card>
 					<div class="card-header ">
@@ -118,7 +120,7 @@
 						</a>
 
 						<!-- Sondaggio -->
-						<a role="button" onclick="goTo(AppURLs.page.survey())" class="grid-item survey">
+						<a role="button" onclick="goTo(AppURLs.page.survey())" class="grid-item survey show-on-pharma--1 d-none">
 							<img class="grid-img" src="./assets/images/icona_sondaggio_della_settimana.png" alt="Sondaggio Benessere Settimanale" width="28" height="28" />
 							<span>Sondaggio Benessere Settimanale</span>
 						</a>
@@ -175,7 +177,7 @@
 
 					<div class="pharmacy-box">
 						<div class="pharmacy-item" onclick="goTo(AppURLs.page.reservation())">Prenota prodotto</div>
-						<div class="pharmacy-item" onclick="goTo(AppURLs.page.reminders())">Terapia personale</div>
+						<div class="pharmacy-item show-on-pharma--1 d-none" onclick="goTo(AppURLs.page.reminders())">Terapia personale</div>
 					</div>
 
 					<div class="pharmacy-box">

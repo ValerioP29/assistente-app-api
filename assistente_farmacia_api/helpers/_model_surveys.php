@@ -6,6 +6,7 @@ class SurveysModel {
 		return array(
 			1 => [
 				"id"         => 1,
+				"pharma_id"  => 1,
 				"title"      => "🛡 Sei protetto dall’influenza? Vaccino e Prevenzione – Scoprilo in 60 secondi",
 				"subtitle"   => "Rispondi alle 5 domande e scopri con questo test rapido se le tue abitudini ti stanno davvero proteggendo.",
 				"summary"    => "La prevenzione funziona solo se fatta prima, non quando i sintomi sono iniziati. La farmacia può consigliarti il percorso più adatto a te.",
@@ -100,6 +101,7 @@ class SurveysModel {
 			],
 			2 => [
 				"id"         => 2,
+				"pharma_id"  => 1,
 				"title"       => "❄️ SOS Pelle Inverno – Scoprilo in 60 Secondi",
 				"subtitle"    => "Rispondi alle 5 domande e scopri se la tua pelle è davvero pronta ad affrontare freddo, vento e riscaldamento.",
 				"summary"     => "Una pelle sana non è solo questione di estetica, ma di equilibrio e protezione. Prenota in farmacia la tua mini-consulenza “Pelle d’Inverno” e scopri la routine ideale per il tuo tipo di pelle.",
@@ -194,6 +196,7 @@ class SurveysModel {
 			],
 			3 => [
 				"id"         => 3,
+				"pharma_id"  => 1,
 				"title"      => "🧠 Quiz – Salute delle orecchie: verità o falsi miti?",
 				"subtitle"   => "Rispondi alle 5 domande e scopri quanto ne sai davvero sulla corretta igiene delle orecchie!",
 				"summary"    => "Le orecchie sono delicate e vanno trattate nel modo giusto: niente cotton fioc, niente rimedi improvvisati. In farmacia trovi spray adeguati, consigli e prodotti sicuri.",
@@ -287,6 +290,7 @@ class SurveysModel {
 			],
 			4 => [
 				"id"         => 4,
+				"pharma_id"  => 1,
 				"title"      => "💧 Lavaggi nasali: quanto ne sai davvero?",
 				"subtitle"   => "Rispondi alle 5 domande e scopri il tuo profilo respiratorio.",
 				"summary"    => "Un naso pulito respira meglio, si ammala di meno e risponde meglio ai farmaci. La farmacia può aiutarti a scegliere la soluzione più adatta.",
@@ -388,6 +392,7 @@ class SurveysModel {
 			],
 			5 => [
 				"id"         => 5,
+				"pharma_id"  => 1,
 				"title"      => "🌞 Vitamina D – Verità o Falsi Miti?",
 				"subtitle"   => "Scopri quanto ne sai e trova il profilo che più ti rappresenta",
 				"summary"    => "",
@@ -511,6 +516,7 @@ class SurveysModel {
 			],
 			6 => [
 				"id"         => 6,
+				"pharma_id"  => 1,
 				"title"      => "💚 QUIZ BENESSERE GOLA",
 				"subtitle"   => "Rispondi alle 5 domande e scopri il tuo profilo gola.",
 				"summary"    => "Scopri quanto ti prendi cura della tua gola e come proteggerla meglio tra freddo, aria secca e sbalzi di temperatura. Se i sintomi persistono rivolgiti al tuo medico o al tuo farmacista!",
@@ -621,6 +627,7 @@ class SurveysModel {
 			],
 			7 => [
 				"id"         => 6,
+				"pharma_id"  => 1,
 				"title"      => "🎄 QUIZ DELLA SETTIMANA – FARMACIA GIOVINAZZI",
 				"subtitle"   => "Disturbi digestivi durante le feste: come ti comporti davvero?",
 				"summary"    => "Durante le feste non conta solo cosa mangiamo,\nma soprattutto come ci comportiamo prima e dopo i pasti.\n👉 Il farmacista è il tuo punto di riferimento\nper capire cosa fare, cosa evitare e quando intervenire.",
@@ -718,9 +725,12 @@ class SurveysModel {
 	 * Cerca un sondaggio per ID
 	 * @return array|false
 	 */
-	public static function findById($id) {
+	public static function findById($id, ?int $pharma_id = null) {
 		$surveys = self::data();
 		$survey = $surveys[$id] ?? FALSE;
+		if( $survey && $pharma_id && isset($survey['pharma_id']) && $survey['pharma_id'] != $pharma_id ){
+			return FALSE;
+		}
 		return $survey;
 	}
 
@@ -728,10 +738,13 @@ class SurveysModel {
 	 * Cerca un sondaggio per giorno
 	 * @return array|false
 	 */
-	public static function findByDate($date) {
+	public static function findByDate($date, ?int $pharma_id = null) {
 		$surveys = self::data();
 		$monday = get_week_start_date($date);
-		$survey = array_filter($surveys, function($_survey) use ($monday) {
+		$survey = array_filter($surveys, function($_survey) use ($monday, $pharma_id) {
+			if( $pharma_id && isset($_survey['pharma_id']) && $_survey['pharma_id'] != $pharma_id ){
+				return FALSE;
+			}
 			return $_survey['start_date'] ? (date('Y-m-d', strtotime($_survey['start_date'])) == $monday) : FALSE;
 		});
 		$survey = array_values($survey);
@@ -743,9 +756,12 @@ class SurveysModel {
 	 * Cerca i sondaggi "aperti" (basandosi su data inizio e data fine)
 	 * @return array|false
 	 */
-	public static function getAllOpen($date_time) {
+	public static function getAllOpen($date_time, ?int $pharma_id = null) {
 		$surveys = self::data();
-		$survey = array_filter($surveys, function($_survey) use ($date_time) {
+		$survey = array_filter($surveys, function($_survey) use ($date_time, $pharma_id) {
+			if( $pharma_id && isset($_survey['pharma_id']) && $_survey['pharma_id'] != $pharma_id ){
+				return FALSE;
+			}
 			if( isset($_survey['start_date']) && isset($_survey['end_date']) ){
 				return $_survey['start_date'] <= $date_time && $date_time <= $_survey['end_date'];
 			}elseif( isset($_survey['start_date']) ){
@@ -807,4 +823,3 @@ class SurveysModel {
 function normalize_survey_data(array $survey) {
 	return SurveysModel::normalize($survey);
 }
-

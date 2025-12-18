@@ -31,7 +31,18 @@ if ($now >= $start && $now <= $end) {
 
 //------------------------------------------------
 
-$challenge = ChallengesModel::getCurrentWeek();
+$pharma = getMyPharma();
+if( ! $pharma ){
+	echo json_encode([
+		'code'    => 400,
+		'status'  => FALSE,
+		'error'   => 'Bad Request',
+		'message' => 'Farmacia non valida.',
+	]);
+	exit;
+}
+
+$challenge = ChallengesModel::getCurrentWeek((int) $pharma['id']);
 if( ! $challenge ){
 	echo json_encode([
 		'code'    => 404,

@@ -304,6 +304,31 @@ document.addEventListener('appLoggedin', function () {
 	}
 });
 
+document.addEventListener('appLoggedin', function () {
+	if (dataStore.user) {
+		document.body.classList.add('user--'+dataStore.user.id);
+		document.body.classList.add('user--'+dataStore.user.username);
+	}
+	if (dataStore.pharma) {
+		document.body.classList.add('pharma--'+dataStore.pharma.id);
+	}
+});
+
+document.addEventListener('appLoggedin', function () {
+	const els = document.querySelectorAll('body [class^="show-on-pharma--"], body [class*=" show-on-pharma--"]');
+	els.forEach(function(_el){
+		const _class = Array.from(_el.classList).find(_class_name => _class_name.startsWith('show-on-pharma--'));
+		if( ! _class ) return;
+		const _pharma_id = parseInt(_class.replace('show-on-pharma--', ''));
+
+		if( _pharma_id != dataStore.pharma.id ){
+			_el.remove();
+		}else{
+			_el.classList.remove('d-none');
+		}
+	});
+});
+
 async function prepareAndSendBooking(params) {
 	const id = params.id ?? '';
 	const type = params.type;

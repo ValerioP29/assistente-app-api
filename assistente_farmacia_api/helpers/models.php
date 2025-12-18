@@ -436,11 +436,11 @@ function get_daily_pill( $date = NULL ){
 	return FALSE;
 }
 
-function get_events(){
+function get_events( $pharma_id ){
 	global $pdo;
 
-	$stmt = $pdo->prepare("SELECT * FROM jta_events WHERE is_deleted = 0 ORDER BY `datetime_start` ASC");
-	$stmt->execute();
+	$stmt = $pdo->prepare("SELECT * FROM jta_events WHERE is_deleted = 0 AND pharma_id = :pharma_id ORDER BY `datetime_start` ASC");
+	$stmt->execute([':pharma_id' => $pharma_id]);
 	$events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 	$events = array_map( function($_event){
@@ -469,11 +469,11 @@ function get_event_by_id( $event_id = NULL ){
 	return $event;
 }
 
-function get_services(){
+function get_services( $pharma_id ){
 	global $pdo;
 
-	$stmt = $pdo->prepare("SELECT * FROM jta_services WHERE is_deleted = 0 ORDER BY title ASC");
-	$stmt->execute();
+	$stmt = $pdo->prepare("SELECT * FROM jta_services WHERE is_deleted = 0 AND pharma_id = :pharma_id ORDER BY title ASC");
+	$stmt->execute([':pharma_id' => $pharma_id]);
 	$services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 	$services = array_map( function($_service){
@@ -608,7 +608,6 @@ function normalize_pharma_data( $pharma_db ){
 		'image_bot'    => 'https://assistentefarmacia.it/app-cliente-farmacia/img/Raffaella.jpg',
 		'image_avatar' => get_pharma_img_src($pharma_db['id'], $pharma_db['img_avatar']),
 		'image_cover'  => get_pharma_img_src($pharma_db['id'], $pharma_db['img_cover']),
-		'cover_image_url' => get_pharma_cover_image_url($pharma_db),
 		'social_list'  => [],
 		'working_info' => [
 			'human' => format_schedule_human_friendly($pharma_db['working_info']),
@@ -627,6 +626,18 @@ function normalize_pharma_data( $pharma_db ){
 		// 	'aria' => 'Visita il nostro profilo Instagram',
 		// 	'url'  => 'https://www.instagram.com/farmaciagiovinazzi/'
 		// ];
+
+		$pharma['image_bot']    = 'https://assistentefarmacia.it/app-cliente-farmacia/img/Raffaella.jpg';
+		$pharma['image_logo']   = 'https://app.assistentefarmacia.it/panel/'.$pharma_db['logo'];
+		$pharma['image_avatar'] = 'https://api.assistentefarmacia.it/uploads/pharmacies/1/logo_farmacia_giovinazzi.png';
+		$pharma['image_cover']  = 'https://api.assistentefarmacia.it/uploads/pharmacies/1/logo_farmacia_giovinazzi.png';
+
+	}elseif( $pharma_db['id'] == 2 ){
+	}elseif( $pharma_db['id'] == 3 ){
+		$pharma['image_bot']    = 'https://api.assistentefarmacia.it/uploads/pharmacies/3/bot_aigemelli.jpg';
+		$pharma['image_logo']   = 'https://app.assistentefarmacia.it/panel/'.$pharma_db['logo'];
+		$pharma['image_avatar'] = 'https://api.assistentefarmacia.it/uploads/pharmacies/3/logo_farmacia_aigemelli.png';
+		$pharma['image_cover']  = 'https://api.assistentefarmacia.it/uploads/pharmacies/3/logo_farmacia_aigemelli.png';
 	}
 
 	return $pharma;
@@ -1126,47 +1137,7 @@ function normalize_reminder_expiry_data( $reminder_db ){
 
 function get_pharma_img_src( $pharma_id = NULL, $filename = NULL ){
 	if( isset($pharma_id, $filename) ){
-		return rtrim(site_url(), '/').'/uploads/pharmacies/1/logo_farmacia_giovinazzi.png';
+		return rtrim(site_url(), '/').'/uploads/pharmacies/'.$pharma_id.'/'.$filename;
 	}
-
 	return;
-}
-
-function get_pharma_cover_image_url( $pharma_db = [] ){
-	$fallback = rtrim(site_url(), '/').'/uploads/images/cover-farmacia-3.jpg';
-
-	if( empty($pharma_db) ) return $fallback;
-
-	$img_cover = $pharma_db['img_cover'] ?? NULL;
-
-	if( empty($img_cover) ) return $fallback;
-
-	$cover_data = $img_cover;
-	if( is_string($cover_data) ){
-		$decoded = json_decode($cover_data, TRUE);
-		if( json_last_error() === JSON_ERROR_NONE ){
-			$cover_data = $decoded;
-		}
-	}
-
-	if( is_array($cover_data) && isset($cover_data['src']) ){
-		$cover_src = $cover_data['src'];
-		$cover_ext = $cover_data['ext'] ?? '.jpg';
-
-		if( $cover_ext && $cover_ext[0] !== '.' ){
-			$cover_ext = '.'.$cover_ext;
-		}
-
-		if( $cover_ext && substr($cover_src, -strlen($cover_ext)) !== $cover_ext ){
-			$cover_src .= $cover_ext;
-		}
-	}else{
-		$cover_src = is_array($cover_data) ? NULL : $cover_data;
-	}
-
-	if( empty($cover_src) ) return $fallback;
-
-	if( filter_var($cover_src, FILTER_VALIDATE_URL) ) return $cover_src;
-
-	return rtrim(site_url(), '/').'/uploads/pharmacies/'.$pharma_db['id'].'/'.ltrim($cover_src, '/');
 }

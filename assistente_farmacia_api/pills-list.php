@@ -16,12 +16,23 @@ if( ! $user ){
 
 //------------------------------------------------
 
+$pharma = getMyPharma();
+if( ! $pharma ){
+	echo json_encode([
+		'code'    => 400,
+		'status'  => FALSE,
+		'error'   => 'Bad Request',
+		'message' => 'Farmacia non valida.',
+	]);
+	exit();
+}
+
 $limit = isset($_GET['limit']) && is_numeric($_GET['limit']) ? (int) $_GET['limit'] : 28;
 if( $limit < 1 ) $limit = 1;
 if( $limit > 28 ) $limit = 28;
 
 // Recupera le pillole più recenti
-$pills = PillsModel::getLatest($limit);
+$pills = PillsModel::getLatest($limit, (int) $pharma['id']);
 
 $my_args = get_my_profiling_args();
 if( ! empty($my_args) ){

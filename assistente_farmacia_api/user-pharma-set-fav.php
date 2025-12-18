@@ -45,6 +45,7 @@ if( $curr_fav_pharma['id'] == $pharma_id ){
 
 $error = null;
 $result = setUserPharmaFav( $user_id, $pharma_id, $error );
+PointsSummaryModel::updateCurrentMonthPoints($user_id, $pharma_id);
 
 if( ! $result ){
 	echo json_encode([
