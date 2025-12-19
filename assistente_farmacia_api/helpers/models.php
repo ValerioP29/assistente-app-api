@@ -644,32 +644,31 @@ function normalize_pharma_data( $pharma_db ){
 }
 
 function normalize_service_data( $service_db ){
-if( ! $service_db ) return FALSE;
+	if( ! $service_db ) return FALSE;
 
-$services = array_filter(array_map('trim', preg_split('/\r?\n/', $service_db['description'] ?? '')));
+	$service = [
+		'id'          => $service_db['id'],
+		'title'       => $service_db['title'],
+		'description' => $service_db['description'],
+		'cover_image' => $service_db['img_cover'],
+		'is_featured' => !! $service_db['is_featured'],
+		'iconClass'   => $service_db['icon_class'],
+	];
 
-$service = [
-'id'          => (int) $service_db['id'],
-'title'       => $service_db['title'],
-'icon_class'  => $service_db['icon_class'],
-'img_cover'   => $service_db['img_cover'],
-'services'    => array_values($services),
-];
+	if( $service['cover_image'] ){
+		$service['cover_image']['src'] = rtrim(site_url(), '/').'/uploads/pharmacies/'.$service_db['pharma_id'].'/services/'.$service_db['img_cover']['src'].'.jpg';
+		$service['cover_image']['is_default'] = FALSE;
+	}else{
+		$service['cover_image'] = [
+			'src'    => rtrim(site_url(), '/').'/uploads/images/placeholder-service.jpg',
+			'alt'    => 'Immagine servizio',
+			'width'  => 1200,
+			'height' => 600,
+			'is_default' => TRUE
+		];
+	}
 
-if( $service['img_cover'] ){
-$service['img_cover']['src'] = rtrim(site_url(), '/').'/uploads/pharmacies/'.$service_db['pharma_id'].'/services/'.$service_db['img_cover']['src'].'.jpg';
-$service['img_cover']['is_default'] = FALSE;
-}else{
-$service['img_cover'] = [
-'src'    => rtrim(site_url(), '/').'/uploads/images/placeholder-service.jpg',
-'alt'    => 'Immagine servizio',
-'width'  => 1200,
-'height' => 600,
-'is_default' => TRUE
-];
-}
-
-return $service;
+	return $service;
 }
 
 function normalize_request_data( $request_db ){

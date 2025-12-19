@@ -16,15 +16,8 @@ if( ! $user ){
 
 //------------------------------------------------
 
-$pharma      = getMyPharma();
-$pharma_id   = (int) ($pharma['id'] ?? 0);
-$requestedId = isset($_REQUEST['pharma_id']) ? (int) $_REQUEST['pharma_id'] : null;
-
-if (!empty($requestedId)) {
-	$pharma_id = $requestedId;
-}
-
-$services = get_services($pharma_id);
+$pharma = getMyPharma();
+$services = get_services((int) $pharma['id']);
 
 echo json_encode([
 	'code'   => 200,

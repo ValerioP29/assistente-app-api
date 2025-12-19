@@ -1,80 +1,61 @@
 document.addEventListener('appLoaded', () => {
-const container = document.getElementById('panel');
-if (!container) return;
+	const container = document.getElementById('panel');
+	if (!container) return;
 
-appFetchWithToken(AppURLs.api.getServices())
-.then(({status, data: servizi}) => {
-if (!status) throw new Error('Errore API nel caricamento servizi');
+	appFetchWithToken(AppURLs.api.getServices())
+		.then(({status, data: servizi}) => {
+			if (!status) throw new Error('Errore API nel caricamento servizi');
 
-container.innerHTML = '';
+			container.innerHTML = '';
 
-servizi.forEach((servizio) => {
-const btn = document.createElement('button');
-btn.classList.add('accordion');
-btn.dataset.id = servizio?.id ?? 'servizio-generico';
-btn.dataset.item = 'service';
-btn.innerHTML = `
-<i class="${servizio.icon_class ?? ''}"></i>
-<span class="title">${servizio.title ?? ''}</span>
-`;
+			servizi.forEach((servizio) => {
+				const btn = document.createElement('button');
+				btn.classList.add('accordion');
+				btn.dataset.id = servizio?.id ?? 'servizio-generico';
+				btn.dataset.item = 'service';
+				btn.innerHTML = `
+					<i class="${servizio.iconClass ?? ''}"></i>
+					<span class="title">${servizio.title ?? ''}</span>
+				`;
 
-const serviziList = (servizio.services || [])
-.map((item) => `<li><span class="service-item-label">${escapeAttr(item)}</span></li>`)
-.join('');
+				const div = document.createElement('div');
+				div.classList.add('panel');
+				div.style.display = 'none';
+				div.innerHTML = `
+					<p>${nl2br(servizio.description ?? '')}</p>
+					<div class="d-flex justify-content-end btn-ai-wrapper">
+						<button class="btn btn-ai btn-ai--service" aria-label="Chiedi all'AI" data-nome="${escapeAttr(servizio.title)}"
+							data-id="${servizio.id}">
+							<img src="./assets/images/assistente_ott25_baloon_raffaella.png" width="32" height="32" alt="" />
+						</button>
+					</div>
+					<div class="booking-form-wrapper">
+						<label for="datetime-${servizio.id}" class="text-center">Seleziona la data:</label>
+						<i class="fas fa-calendar-alt calendar-icon"></i>
+						<input id="datetime-${servizio.id}" type="datetime-local" name="pickup" class="booking-form form-control" required />
+					</div>
+					<p class="small text-muted mt-2">
+						Le date e gli orari scelti devono rispettare l'orario di apertura della farmacia. 
+						<a role="button" class="see-hours">Vedi orari</a>
+					</p>
+					<a href="#" class="cta">Prenota ora</a>
+					<p class="small text-muted mt-2 mb-0">** Le richieste inviate dopo le ore 13:00 potrebbero essere gestite il giorno successivo.</p>
+				`;
 
-const coverImage = servizio.img_cover?.src
-? `<div class="service-cover"><img src="${servizio.img_cover.src}" alt="${escapeAttr(servizio.img_cover.alt ?? servizio.title ?? 'Servizio')}" loading="lazy"></div>`
-: '';
+				btn.addEventListener('click', function () {
+					this.classList.toggle('active');
+					const panel = this.nextElementSibling;
+					panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+				});
 
-const options = (servizio.services || [])
-.map((item) => `<option value="${escapeAttr(item)}">${escapeAttr(item)}</option>`)
-.join('');
+				// Append
+				container.appendChild(btn);
+				container.appendChild(div);
+			});
 
-const div = document.createElement('div');
-div.classList.add('panel');
-div.style.display = 'none';
-div.innerHTML = `
-${coverImage}
-<div class="services-list-wrapper">
-<ul class="services-items list-unstyled">${serviziList}</ul>
-<div class="d-flex justify-content-end btn-ai-wrapper">
-<button class="btn btn-ai btn-ai--service" aria-label="Chiedi all'AI" data-nome="${escapeAttr(servizio.title)}" data-id="${servizio.id}">
-<img src="./assets/images/assistente_ott25_baloon_raffaella.png" width="32" height="32" alt="" />
-</button>
-</div>
-</div>
-<div class="booking-form-wrapper">
-<label class="text-center">Scegli il servizio:</label>
-<select class="form-select service-select" aria-label="Scegli il servizio">
-<option value="">Scegli il servizio</option>
-${options}
-</select>
-<label class="text-center">Seleziona la data:</label>
-<i class="fas fa-calendar-alt calendar-icon"></i>
-<input type="datetime-local" name="pickup" class="booking-form form-control" required />
-</div>
-<p class="small text-muted mt-2">
-Le date e gli orari scelti devono rispettare l'orario di apertura della farmacia.
-<a role="button" class="see-hours">Vedi orari</a>
-</p>
-<a href="#" class="cta">Prenota ora</a>
-<p class="small text-muted mt-2 mb-0">** Le richieste inviate dopo le ore 13:00 potrebbero essere gestite il giorno successivo.</p>
-`;
-
-btn.addEventListener('click', function () {
-this.classList.toggle('active');
-const panel = this.nextElementSibling;
-panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-});
-
-// Append
-container.appendChild(btn);
-container.appendChild(div);
-});
-
-document.dispatchEvent(new CustomEvent('servicesLoaded'));
-})
-.catch((err) => handleError(err, 'Errore nel caricamento dei servizi'));
+			document.dispatchEvent(new CustomEvent('servicesLoaded'));
+		})
+		.catch((err) => handleError(err, 'Errore nel caricamento dei servizi'));
 
 	function getServiceButtonFromPanel(panel) {
 		if (!panel) return null;
@@ -83,7 +64,7 @@ document.dispatchEvent(new CustomEvent('servicesLoaded'));
 		return null;
 	}
 
-document.addEventListener('click', async (e) => {
+	document.addEventListener('click', async (e) => {
 		if (e.target.classList.contains('calendar-icon')) {
 			const input = e.target.closest('.booking-form-wrapper')?.querySelector("input[type='datetime-local']");
 			input?.showPicker?.();
@@ -98,23 +79,16 @@ document.addEventListener('click', async (e) => {
 			return;
 		}
 
-if (e.target.matches('.panel .cta')) {
-e.preventDefault();
-const panel = e.target.closest('.panel');
-const input = panel?.querySelector("input[type='datetime-local']");
-const select = panel?.querySelector('.service-select');
-const datetime = input?.value ?? '';
-const selectedService = select?.value ?? '';
+		if (e.target.matches('.panel .cta')) {
+			e.preventDefault();
+			const panel = e.target.closest('.panel');
+			const input = panel?.querySelector("input[type='datetime-local']");
+			const datetime = input?.value ?? '';
 
-if (!selectedService) {
-showToast('Seleziona il servizio che desideri prenotare', 'warning');
-return;
-}
-
-if (!datetime) {
-showToast('Inserisci data e orario prima di prenotare', 'warning');
-return;
-}
+			if (!datetime) {
+				showToast('Inserisci data e orario prima di prenotare', 'warning');
+				return;
+			}
 
 			if (new Date(datetime) < new Date()) {
 				showToast('Seleziona una data futura valida', 'warning');
@@ -122,23 +96,21 @@ return;
 			}
 
 			const btn = getServiceButtonFromPanel(panel);
-const service = btn?.querySelector('.title')?.textContent.trim() ?? 'Servizio';
+			const service = btn?.querySelector('.title')?.textContent.trim() ?? 'Servizio';
 
-try {
-const id = btn?.dataset?.id ?? '';
-const success = await prepareAndSendBooking({
-id,
-type: 'service',
-datetime,
-message: selectedService,
-});
+			try {
+				const id = btn?.dataset?.id ?? '';
+				const success = await prepareAndSendBooking({
+					id,
+					type: 'service',
+					datetime,
+				});
 
-if (success) {
-input.value = '';
-if (select) select.value = '';
-showToast(success.message, 'warning');
-}
-} catch (error) {
+				if (success) {
+					input.value = '';
+					showToast(success.message, 'warning');
+				}
+			} catch (error) {
 				handleError(error, 'Errore di rete. Riprova più tardi.');
 			}
 		}
