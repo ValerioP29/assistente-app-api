@@ -1,6 +1,15 @@
 document.addEventListener('appLoaded', () => {
-	const container = document.getElementById('panel');
-	if (!container) return;
+        const body = document.body;
+        if (body) {
+                body.classList.add('services-page');
+
+                if (!body.classList.contains('page-services')) {
+                        body.classList.add('page-services');
+                }
+        }
+
+        const container = document.getElementById('panel');
+        if (!container) return;
 
 	const pharmaId = Number(dataStore?.pharma?.id);
 	const isMacroLayout = pharmaId === 3;
