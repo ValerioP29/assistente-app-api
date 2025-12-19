@@ -21,6 +21,7 @@ $input = json_decode(file_get_contents("php://input"), TRUE);
 $service_id = $input['id'] ?? NULL;
 $datetime   = $input['datetime'] ?? FALSE;
 $request    = $input['request'] ?? FALSE;
+$selected_service = trim($input['message'] ?? '') ?: FALSE;
 
 // Richiesta mal formata
 if( ! ( ( $service_id && $datetime ) OR $request ) ){
@@ -34,9 +35,9 @@ if( ! ( ( $service_id && $datetime ) OR $request ) ){
 }
 
 if( $service_id ){
-	$service = get_service_by_id( $service_id );
-	if( ! $service ){
-		echo json_encode([
+$service = get_service_by_id( $service_id );
+if( ! $service ){
+echo json_encode([
 			'code'    => 404,
 			'status'  => FALSE,
 			'error'   => 'Not Found',
@@ -45,13 +46,16 @@ if( $service_id ){
 		exit();
 	}
 
-	$title = $service['title'];
-	$human_date = date('d-m-Y H:i', strtotime($datetime));
-	$request_response = 'Ti confermiamo che la farmacia è stata informata della tua richiesta. Ti avviseremo quando la tua richiesta sarà confermata.';
+$title = $service['title'];
+$human_date = date('d-m-Y H:i', strtotime($datetime));
+$request_response = 'Ti confermiamo che la farmacia è stata informata della tua richiesta. Ti avviseremo quando la tua richiesta sarà confermata.';
+
+$selected_service_text = $selected_service ? "🧾 Dettaglio: $selected_service\n" : '';
 
 $message = <<<EOT
 📅 Prenotazione Servizio
 🛎️ Servizio: $title
+$selected_service_text
 📆 Data e Ora: $human_date
 
 💬 $request_response
