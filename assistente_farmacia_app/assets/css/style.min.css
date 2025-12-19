@@ -4493,3 +4493,8 @@ body.has-bottom-nav .site-footer .btn-cart {
   z-index: 50;
 }/*# sourceMappingURL=style.css.map */
 .services-list-wrapper{margin-top:12px}.services-items{display:grid;gap:8px;padding-left:0;margin-bottom:16px}.services-items li{background:#f7f8fb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px}.services-items .service-item-label{font-weight:600;color:#1f2937}.service-cover img{width:100%;height:auto;border-radius:12px;margin-bottom:12px}.booking-form-wrapper .service-select{margin:10px 0 12px}
+body.page-services:not(.pharma--1) .service-description__list{list-style:disc;padding-left:20px;margin-bottom:12px;display:grid;gap:6px;color:#374151}
+body.page-services:not(.pharma--1) .service-description__list li{padding-left:4px}
+body.page-services:not(.pharma--1) .service-select{margin:12px 0}
+body.page-services:not(.pharma--1) .service-select .form-select{border-color:#d1d5db;box-shadow:none}
+body.page-services:not(.pharma--1) .service-select .form-label{color:#4b5563;margin-bottom:4px;display:block}
