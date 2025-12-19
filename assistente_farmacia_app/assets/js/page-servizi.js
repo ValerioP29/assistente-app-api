@@ -1,6 +1,16 @@
 document.addEventListener('appLoaded', () => {
-	const container = document.getElementById('panel');
-	if (!container) return;
+        const container = document.getElementById('panel');
+        if (!container) return;
+
+        const isBaselinePharma = dataStore?.pharma?.id === 1;
+
+        const parseServices = (description) => {
+                if (!description || typeof description !== 'string') return [];
+                return description
+                        .split(/\r?\n/)
+                        .map((service) => service.trim())
+                        .filter(Boolean);
+        };
 
 	appFetchWithToken(AppURLs.api.getServices())
 		.then(({status, data: servizi}) => {
@@ -8,39 +18,65 @@ document.addEventListener('appLoaded', () => {
 
 			container.innerHTML = '';
 
-			servizi.forEach((servizio) => {
-				const btn = document.createElement('button');
-				btn.classList.add('accordion');
-				btn.dataset.id = servizio?.id ?? 'servizio-generico';
+                        servizi.forEach((servizio) => {
+                                const btn = document.createElement('button');
+                                btn.classList.add('accordion');
+                                btn.dataset.id = servizio?.id ?? 'servizio-generico';
 				btn.dataset.item = 'service';
 				btn.innerHTML = `
 					<i class="${servizio.iconClass ?? ''}"></i>
 					<span class="title">${servizio.title ?? ''}</span>
 				`;
 
-				const div = document.createElement('div');
-				div.classList.add('panel');
-				div.style.display = 'none';
-				div.innerHTML = `
-					<p>${nl2br(servizio.description ?? '')}</p>
-					<div class="d-flex justify-content-end btn-ai-wrapper">
-						<button class="btn btn-ai btn-ai--service" aria-label="Chiedi all'AI" data-nome="${escapeAttr(servizio.title)}"
-							data-id="${servizio.id}">
-							<img src="./assets/images/assistente_ott25_baloon_raffaella.png" width="32" height="32" alt="" />
-						</button>
-					</div>
-					<div class="booking-form-wrapper">
-						<label for="datetime-${servizio.id}" class="text-center">Seleziona la data:</label>
-						<i class="fas fa-calendar-alt calendar-icon"></i>
-						<input id="datetime-${servizio.id}" type="datetime-local" name="pickup" class="booking-form form-control" required />
-					</div>
-					<p class="small text-muted mt-2">
-						Le date e gli orari scelti devono rispettare l'orario di apertura della farmacia. 
-						<a role="button" class="see-hours">Vedi orari</a>
-					</p>
-					<a href="#" class="cta">Prenota ora</a>
-					<p class="small text-muted mt-2 mb-0">** Le richieste inviate dopo le ore 13:00 potrebbero essere gestite il giorno successivo.</p>
-				`;
+                                const div = document.createElement('div');
+                                div.classList.add('panel');
+                                div.style.display = 'none';
+
+                                const servicesList = parseServices(servizio.description);
+
+                                const servicesDescription = isBaselinePharma || !servicesList.length
+                                        ? `<p>${nl2br(servizio.description ?? '')}</p>`
+                                        : `
+                                                        <div class="service-description">
+                                                                <ul class="service-description__list">
+                                                                        ${servicesList.map((service) => `<li>${service}</li>`).join('')}
+                                                                </ul>
+                                                        </div>
+                                                `;
+
+                                const servicesSelect = !isBaselinePharma && servicesList.length
+                                        ? `
+                                                        <div class="service-select">
+                                                                <label class="form-label fw-semibold" for="service-${servizio.id}">Scegli il servizio</label>
+                                                                <select id="service-${servizio.id}" class="form-select service-select__control">
+                                                                        <option value="">Seleziona il servizio</option>
+                                                                        ${servicesList.map((service) => `<option value="${escapeAttr(service)}">${service}</option>`).join('')}
+                                                                </select>
+                                                        </div>
+                                                `
+                                        : '';
+
+                                div.innerHTML = `
+                                        ${servicesDescription}
+                                        <div class="d-flex justify-content-end btn-ai-wrapper">
+                                                <button class="btn btn-ai btn-ai--service" aria-label="Chiedi all'AI" data-nome="${escapeAttr(servizio.title)}"
+                                                        data-id="${servizio.id}">
+                                                        <img src="./assets/images/assistente_ott25_baloon_raffaella.png" width="32" height="32" alt="" />
+                                                </button>
+                                        </div>
+                                        ${servicesSelect}
+                                        <div class="booking-form-wrapper">
+                                                <label for="datetime-${servizio.id}" class="text-center">Seleziona la data:</label>
+                                                <i class="fas fa-calendar-alt calendar-icon"></i>
+                                                <input id="datetime-${servizio.id}" type="datetime-local" name="pickup" class="booking-form form-control" required />
+                                        </div>
+                                        <p class="small text-muted mt-2">
+                                                Le date e gli orari scelti devono rispettare l'orario di apertura della farmacia.
+                                                <a role="button" class="see-hours">Vedi orari</a>
+                                        </p>
+                                        <a href="#" class="cta">Prenota ora</a>
+                                        <p class="small text-muted mt-2 mb-0">** Le richieste inviate dopo le ore 13:00 potrebbero essere gestite il giorno successivo.</p>
+                                `;
 
 				btn.addEventListener('click', function () {
 					this.classList.toggle('active');
@@ -81,30 +117,41 @@ document.addEventListener('appLoaded', () => {
 
 		if (e.target.matches('.panel .cta')) {
 			e.preventDefault();
-			const panel = e.target.closest('.panel');
-			const input = panel?.querySelector("input[type='datetime-local']");
-			const datetime = input?.value ?? '';
+                        const panel = e.target.closest('.panel');
+                        const input = panel?.querySelector("input[type='datetime-local']");
+                        const datetime = input?.value ?? '';
 
-			if (!datetime) {
-				showToast('Inserisci data e orario prima di prenotare', 'warning');
-				return;
-			}
+                        const selectedService = panel?.querySelector('.service-select__control')?.value?.trim() ?? '';
 
-			if (new Date(datetime) < new Date()) {
-				showToast('Seleziona una data futura valida', 'warning');
-				return;
-			}
+                        if (!datetime) {
+                                showToast('Inserisci data e orario prima di prenotare', 'warning');
+                                return;
+                        }
 
-			const btn = getServiceButtonFromPanel(panel);
-			const service = btn?.querySelector('.title')?.textContent.trim() ?? 'Servizio';
+                        if (new Date(datetime) < new Date()) {
+                                showToast('Seleziona una data futura valida', 'warning');
+                                return;
+                        }
+
+                        if (!isBaselinePharma) {
+                                const hasOptions = !!panel?.querySelector('.service-select__control');
+                                if (hasOptions && !selectedService) {
+                                        showToast('Seleziona un servizio prima di prenotare', 'warning');
+                                        return;
+                                }
+                        }
+
+                        const btn = getServiceButtonFromPanel(panel);
+                        const service = btn?.querySelector('.title')?.textContent.trim() ?? 'Servizio';
 
 			try {
-				const id = btn?.dataset?.id ?? '';
-				const success = await prepareAndSendBooking({
-					id,
-					type: 'service',
-					datetime,
-				});
+                                const id = btn?.dataset?.id ?? '';
+                                const success = await prepareAndSendBooking({
+                                        id,
+                                        type: 'service',
+                                        datetime,
+                                        message: selectedService ? `Servizio selezionato: ${selectedService}` : undefined,
+                                });
 
 				if (success) {
 					input.value = '';
