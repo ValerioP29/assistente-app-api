@@ -4492,3 +4492,4 @@ body.has-bottom-nav .site-footer .btn-cart {
   bottom: calc(12px + var(--bottom-nav-height, 68px));
   z-index: 50;
 }/*# sourceMappingURL=style.css.map */
+.services-list-wrapper{margin-top:12px}.services-items{display:grid;gap:8px;padding-left:0;margin-bottom:16px}.services-items li{background:#f7f8fb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px}.services-items .service-item-label{font-weight:600;color:#1f2937}.service-cover img{width:100%;height:auto;border-radius:12px;margin-bottom:12px}.booking-form-wrapper .service-select{margin:10px 0 12px}
